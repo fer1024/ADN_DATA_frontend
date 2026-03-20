@@ -31,7 +31,7 @@ export default function LoginView() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] p-4">
-      <div className="w-full max-w-sm sm:max-w-md">
+      <div className="w-full max-w-xs sm:max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
             ADN <span className="text-cyan-500">DATA</span>

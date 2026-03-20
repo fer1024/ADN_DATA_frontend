@@ -33,18 +33,19 @@ export default function RegisterView() {
   const handleRegister = (formData: UserRegistrationForm) => mutate(formData)
 
   return (
-    <>
-      <div className="text-center">
-        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-          Crear <span className="text-cyan-500">Cuenta</span>
-        </h1>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] p-4">
+      <div className="w-full max-w-xs sm:max-w-md">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Crear <span className="text-cyan-500">Cuenta</span>
+          </h1>
+        </div>
 
-      <form
-        onSubmit={handleSubmit(handleRegister)}
-        className="space-y-5 p-3 sm:p-6 bg-[#1e293b] mt-6 sm:mt-10 shadow-2xl rounded-2xl border border-slate-700/50"
-        noValidate
-      >
+        <form
+          onSubmit={handleSubmit(handleRegister)}
+          className="space-y-5 p-3 sm:p-6 bg-[#1e293b] shadow-2xl rounded-2xl border border-slate-700/50"
+          noValidate
+        >
         <div className="flex flex-col gap-3">
           <label
             className="font-semibold text-xl text-slate-300 ml-1"
@@ -54,7 +55,7 @@ export default function RegisterView() {
             id="email"
             type="email"
             placeholder="Email"
-            className="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
+            className="w-full p-2 sm:p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
             {...register("email", {
               required: "El Email  es obligatorio",
               pattern: {
@@ -70,12 +71,12 @@ export default function RegisterView() {
 
         <div className="flex flex-col gap-3">
           <label
-            className="font-semibold text-xl text-slate-300 ml-1"
+            className="font-semibold text-sm sm:text-xl text-slate-300 ml-1"
           >Nombre</label>
           <input
             type="name"
             placeholder="Nombre de Usuario"
-            className="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
+            className="w-full p-2 sm:p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
             {...register("name", {
               required: "El Nombre de usuario es obligatorio",
             })}
@@ -87,13 +88,13 @@ export default function RegisterView() {
 
         <div className="flex flex-col gap-3">
           <label
-            className="font-semibold text-xl text-slate-300 ml-1"
+            className="font-semibold text-sm sm:text-xl text-slate-300 ml-1"
           >Password</label>
 
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
+            className="w-full p-2 sm:p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
             {...register("password", {
               required: "El Password es obligatorio",
               minLength: {
@@ -109,14 +110,14 @@ export default function RegisterView() {
 
         <div className="flex flex-col gap-3">
           <label
-            className="font-semibold text-xl text-slate-300 ml-1"
+            className="font-semibold text-sm sm:text-xl text-slate-300 ml-1"
           >Repetir Password</label>
 
           <input
             id="password_confirmation"
             type="password"
             placeholder="Repite Password"
-            className="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
+            className="w-full p-2 sm:p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
             {...register("password_confirmation", {
               required: "Repetir Password es obligatorio",
               validate: value => value === password || 'Los Passwords no son iguales'
@@ -131,11 +132,11 @@ export default function RegisterView() {
         <input
           type="submit"
           value='Registrarme'
-          className="bg-cyan-600 hover:bg-cyan-500 w-full p-3 text-white font-black text-xl cursor-pointer rounded-lg shadow-lg shadow-cyan-900/20 transition-all active:scale-[0.98] mt-4"
+          className="bg-cyan-600 hover:bg-cyan-500 w-full p-2 sm:p-3 text-white font-black text-base sm:text-xl cursor-pointer rounded-lg shadow-lg shadow-cyan-900/20 transition-all active:scale-[0.98] mt-4"
         />
       </form>
 
-      <nav className="mt-10 flex flex-col space-y-4">
+      <nav className="mt-6 flex flex-col space-y-4">
         <Link
           to={'/auth/login'}
           className="text-center text-slate-400 hover:text-cyan-500 transition-colors font-normal"
@@ -146,6 +147,7 @@ export default function RegisterView() {
           className="text-center text-slate-500 hover:text-slate-300 transition-colors font-normal"
         >¿Olvidaste tu contraseña? Reestablecer</Link>
       </nav>
-    </>
+      </div>
+    </div>
   )
 }
