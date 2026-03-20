@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { deleteProject } from '@/api/ProjectAPI';
 
 export default function DeleteProjectModal() {
-    const initialValues : CheckPasswordForm = {
+    const initialValues: CheckPasswordForm = {
         password: ''
     }
     const location = useLocation()
@@ -18,11 +18,12 @@ export default function DeleteProjectModal() {
 
     const queryParams = new URLSearchParams(location.search);
     const deleteProjectId = queryParams.get('deleteProject')!;
-    const show = deleteProjectId ? true : false
+    const show = !!deleteProjectId
 
     const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: initialValues })
 
     const queryClient = useQueryClient()
+
     const checkUserPasswordMutation = useMutation({
         mutationFn: checkPassword,
         onError: (error) => toast.error(error.message)
@@ -30,25 +31,22 @@ export default function DeleteProjectModal() {
 
     const deleteProjectMutation = useMutation({
         mutationFn: deleteProject,
-        onError: (error) => {
-          toast.error(error.message)
-        },
+        onError: (error) => toast.error(error.message),
         onSuccess: (data) => {
-          toast.success(data)
-          queryClient.invalidateQueries({ queryKey: ['projects'] })
-          navigate(location.pathname, { replace: true })
+            toast.success(data)
+            queryClient.invalidateQueries({ queryKey: ['projects'] })
+            navigate(location.pathname, { replace: true })
         }
-      })
+    })
 
     const handleForm = async (formData: CheckPasswordForm) => {
         await checkUserPasswordMutation.mutateAsync(formData)
         await deleteProjectMutation.mutateAsync(deleteProjectId)
     }
 
-
     return (
         <Transition appear show={show} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={() => navigate(location.pathname, { replace: true })}>
+            <Dialog as="div" className="relative z-50" onClose={() => navigate(location.pathname, { replace: true })}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -58,7 +56,7 @@ export default function DeleteProjectModal() {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black/60" />
+                    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-y-auto">
@@ -72,35 +70,37 @@ export default function DeleteProjectModal() {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all p-16">
+                            <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-3xl bg-[#0f172a] p-12 text-left align-middle shadow-2xl transition-all border border-cyan-500/20">
 
                                 <Dialog.Title
                                     as="h3"
-                                    className="font-black text-4xl  my-5"
-                                >Eliminar Proyecto </Dialog.Title>
+                                    className="font-black text-4xl text-white my-5"
+                                >
+                                    Eliminar <span className="text-cyan-500">Proyecto</span>
+                                </Dialog.Title>
 
-                                <p className="text-xl font-bold">Confirma la eliminación del proyecto {''}
-                                    <span className="text-fuchsia-600">colocando tu password</span>
+                                <p className="text-xl font-light text-slate-400">
+                                    Esta acción es irreversible. Confirma colocando tu {''}
+                                    <span className="text-cyan-500/80 font-bold italic">password</span>
                                 </p>
 
                                 <form
-                                    className="mt-10 space-y-5"
+                                    className="mt-10 space-y-8"
                                     onSubmit={handleSubmit(handleForm)}
                                     noValidate
                                 >
-
                                     <div className="flex flex-col gap-3">
                                         <label
-                                            className="font-normal text-2xl"
+                                            className="font-normal text-2xl text-slate-300"
                                             htmlFor="password"
-                                        >Password</label>
+                                        >Password de confirmación</label>
                                         <input
                                             id="password"
                                             type="password"
-                                            placeholder="Password Inicio de Sesión"
-                                            className="w-full p-3  border-gray-300 border"
+                                            placeholder="Ingresa tu contraseña"
+                                            className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition-colors"
                                             {...register("password", {
-                                                required: "El password es obligatorio",
+                                                required: "El password es obligatorio para eliminar",
                                             })}
                                         />
                                         {errors.password && (
@@ -110,9 +110,17 @@ export default function DeleteProjectModal() {
 
                                     <input
                                         type="submit"
-                                        className=" bg-fuchsia-600 hover:bg-fuchsia-700 w-full p-3  text-white font-black  text-xl cursor-pointer"
-                                        value='Eliminar Proyecto'
+                                        className="bg-red-600 hover:bg-red-500 w-full p-4 text-white uppercase font-black text-xl cursor-pointer transition-all rounded-xl shadow-lg active:scale-[0.98]"
+                                        value='Eliminar Definitivamente'
                                     />
+                                    
+                                    <button
+                                        type="button"
+                                        className="w-full text-slate-500 font-bold hover:text-slate-300 transition-colors"
+                                        onClick={() => navigate(location.pathname, { replace: true })}
+                                    >
+                                        Cancelar y volver
+                                    </button>
                                 </form>
                             </Dialog.Panel>
                         </Transition.Child>

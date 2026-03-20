@@ -53,7 +53,7 @@ export default function TaskModalDetails() {
     if (data) return (
         <>
             <Transition appear show={show} as={Fragment}>
-                <Dialog as="div" className="relative z-10" onClose={() => navigate(location.pathname, { replace: true })}>
+                <Dialog as="div" className="relative z-50" onClose={() => navigate(location.pathname, { replace: true })}>
                     <Transition.Child
                         as={Fragment}
                         enter="ease-out duration-300"
@@ -63,7 +63,7 @@ export default function TaskModalDetails() {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black/60" />
+                        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" />
                     </Transition.Child>
 
                     <div className="fixed inset-0 overflow-y-auto">
@@ -77,50 +77,83 @@ export default function TaskModalDetails() {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all p-16">
-                                    <p className='text-sm text-slate-400'>Agregada el: {formatDate(data.createdAt)} </p>
-                                    <p className='text-sm text-slate-400'>Última actualización: {formatDate(data.updatedAt)} </p>
-
-                                    <Dialog.Title
-                                        as="h3"
-                                        className="font-black text-4xl text-slate-600 my-5"
-                                    >{data.name} </Dialog.Title>
-
-                                    <p className='text-lg text-slate-500 mb-2'>Descripción: {data.description}</p>
-
-                                    {data.completedBy.length ? (
-                                        <>
-                                            <p className='font-bold text-2xl text-slate-600 my-5'>Historial de Cambios</p>
-
-                                            <ul className=' list-decimal'>
-                                                {data.completedBy.map((activityLog) => (
-                                                    <li key={activityLog._id}>
-                                                        <span className='font-bold text-slate-600'>
-                                                            {statusTranslations[activityLog.status]}
-                                                        </span>{' '} por: {activityLog.user.name}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </>
-                                    ) : null }
-
-
-                                    <div className='my-5 space-y-3'>
-                                        <label className='font-bold'>Estado Actual:</label>
-                                        <select
-                                            className='w-full p-3 bg-white border border-gray-300'
-                                            defaultValue={data.status}
-                                            onChange={handleChange}
-                                        >
-                                            {Object.entries(statusTranslations).map(([key, value]) => (
-                                                <option key={key} value={key}>{value}</option>
-                                            ))}
-                                        </select>
+                                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-3xl bg-[#0f172a] border border-slate-700 text-left align-middle shadow-2xl transition-all p-12 relative">
+                                    
+                                    {/* Cabecera Técnica */}
+                                    <div className="flex flex-col md:flex-row md:justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
+                                        <div>
+                                            <Dialog.Title as="h3" className="font-black text-4xl text-white tracking-tight">
+                                                {data.name}
+                                            </Dialog.Title>
+                                            <p className='text-cyan-500 font-mono text-xs uppercase tracking-widest mt-2'>Task Identity: {taskId.slice(-8)}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className='text-xs text-slate-500 font-mono'>CREATED: {formatDate(data.createdAt)}</p>
+                                            <p className='text-xs text-slate-500 font-mono uppercase'>Updated: {formatDate(data.updatedAt)}</p>
+                                        </div>
                                     </div>
 
-                                    <NotesPanel 
-                                        notes={data.notes}
-                                    />
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                                        <div className="lg:col-span-2 space-y-8">
+                                            {/* Descripción */}
+                                            <section>
+                                                <h4 className="text-slate-400 font-bold uppercase text-xs tracking-widest mb-3">Descripción de la Tarea</h4>
+                                                <p className='text-xl text-slate-300 leading-relaxed bg-slate-900/50 p-6 rounded-2xl border border-slate-800'>
+                                                    {data.description}
+                                                </p>
+                                            </section>
+
+                                            {/* Historial como Log de Sistema */}
+                                            {data.completedBy.length ? (
+                                                <section>
+                                                    <h4 className="text-slate-400 font-bold uppercase text-xs tracking-widest mb-4">Activity Log / Historial</h4>
+                                                    <ul className='space-y-2 bg-[#0a0f1d] p-4 rounded-xl border border-slate-800 font-mono text-sm max-h-48 overflow-y-auto'>
+                                                        {data.completedBy.map((activityLog) => (
+                                                            <li key={activityLog._id} className="text-slate-400 py-1 border-b border-white/5 last:border-0">
+                                                                <span className='text-cyan-500'>[STATUS_CHANGE]</span>{' '}
+                                                                <span className='font-bold text-slate-200 uppercase'>
+                                                                    {statusTranslations[activityLog.status]}
+                                                                </span>
+                                                                <span className="mx-2 text-slate-600">|</span>
+                                                                <span>USER: {activityLog.user.name}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            ) : null}
+
+                                            {/* Notas del Panel */}
+                                            <div className="pt-4">
+                                                <NotesPanel notes={data.notes} />
+                                            </div>
+                                        </div>
+
+                                        {/* Barra Lateral de Control */}
+                                        <div className="space-y-6">
+                                            <div className='bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-inner'>
+                                                <label className='block text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-4'>Control de Fase</label>
+                                                <select
+                                                    className='w-full p-3 bg-[#0f172a] border border-slate-700 rounded-xl text-white font-bold focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all cursor-pointer'
+                                                    defaultValue={data.status}
+                                                    onChange={handleChange}
+                                                >
+                                                    {Object.entries(statusTranslations).map(([key, value]) => (
+                                                        <option key={key} value={key} className="bg-[#0f172a]">{value}</option>
+                                                    ))}
+                                                </select>
+                                                <p className="mt-4 text-[10px] text-slate-500 italic leading-snug text-center">
+                                                    Cambiar la fase actualizará el Pipeline CRISP-DM automáticamente.
+                                                </p>
+                                            </div>
+
+                                            <button 
+                                                onClick={() => navigate(location.pathname, { replace: true })}
+                                                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-xl transition-colors uppercase text-xs tracking-widest"
+                                            >
+                                                Cerrar Terminal
+                                            </button>
+                                        </div>
+                                    </div>
                                 </Dialog.Panel>
                             </Transition.Child>
                         </div>

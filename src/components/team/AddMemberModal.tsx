@@ -15,7 +15,7 @@ export default function AddMemberModal() {
     return (
         <>
             <Transition appear show={show} as={Fragment}>
-                <Dialog as="div" className="relative z-10" onClose={() => navigate(location.pathname, { replace: true })}>
+                <Dialog as="div" className="relative z-50" onClose={() => navigate(location.pathname, { replace: true })}>
                     <Transition.Child
                         as={Fragment}
                         enter="ease-out duration-300"
@@ -25,7 +25,8 @@ export default function AddMemberModal() {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black/60" />
+                        {/* Backdrop con desenfoque de cristal (Glassmorphism) */}
+                        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-md" />
                     </Transition.Child>
 
                     <div className="fixed inset-0 overflow-y-auto">
@@ -39,17 +40,26 @@ export default function AddMemberModal() {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all p-16">
+                                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-3xl bg-[#1e293b] text-left align-middle shadow-2xl transition-all p-16 border border-slate-700 relative">
+                                    
+                                    {/* Acento estético de red */}
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
+
                                     <Dialog.Title
                                         as="h3"
-                                        className="font-black text-4xl  my-5"
+                                        className="font-black text-4xl text-white my-5 tracking-tight"
                                     >
-                                        Agregar Integrante al equipo
+                                        Agregar <span className="text-cyan-500">Integrante</span>
                                     </Dialog.Title>
-                                    <p className="text-xl font-bold">Busca el nuevo integrante por email {''}
-                                        <span className="text-fuchsia-600">para agregarlo al proyecto</span>
+
+                                    <p className="text-xl font-light text-slate-400">
+                                        Busca el nuevo integrante por email para <span className="text-cyan-500 font-bold uppercase tracking-wider">sincronizarlo</span> al proyecto
                                     </p>
-                                    <AddMemberForm />
+
+                                    <div className="mt-10">
+                                        {/* El formulario heredará el estilo técnico si aplicamos los inputs oscuros */}
+                                        <AddMemberForm />
+                                    </div>
                                     
                                 </Dialog.Panel>
                             </Transition.Child>

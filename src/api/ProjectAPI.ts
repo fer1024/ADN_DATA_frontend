@@ -47,6 +47,8 @@ export async function getFullProject(id: Project['_id']) {
         const response = projectSchema.safeParse(data)
         if(response.success) {
             return response.data
+        } else {
+            console.log('ZOD ERROR:', JSON.stringify(response.error.issues, null, 2))
         }
     } catch (error) {
         if(isAxiosError(error) && error.response) {

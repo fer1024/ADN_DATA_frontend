@@ -10,7 +10,6 @@ export default function AddNoteForm() {
 
     const params = useParams()
     const location = useLocation()
-
     const queryParams = new URLSearchParams(location.search)
 
     const projectId = params.projectId!
@@ -20,10 +19,10 @@ export default function AddNoteForm() {
         content: ''
     }
 
-    const { register, handleSubmit, reset, formState: {errors} } = useForm({defaultValues: initialValues})
+    const { register, handleSubmit, reset, formState: {errors} } = useForm({defaultValues: initialValues})
 
     const queryClient = useQueryClient()
-    const { mutate } = useMutation({
+    const { mutate } = useMutation({
         mutationFn: createNote,
         onError: (error) => {
             toast.error(error.message)
@@ -33,6 +32,7 @@ export default function AddNoteForm() {
             queryClient.invalidateQueries({queryKey: ['task', taskId]})
         }
     })
+    
     const handleAddNote = (formData: NoteFormData) => {
         mutate({projectId, taskId, formData})
         reset()
@@ -41,18 +41,22 @@ export default function AddNoteForm() {
     return (
         <form
             onSubmit={handleSubmit(handleAddNote)}
-            className="space-y-3"
+            className="space-y-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 shadow-inner mt-10"
             noValidate
         >
             <div className="flex flex-col gap-2">
-                <label className="font-bold" htmlFor="content">Crear Nota</label>
-                <input
+                <label 
+                    className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1" 
+                    htmlFor="content"
+                >
+                    Nueva Observación / Nota
+                </label>
+                <textarea
                     id="content"
-                    type="text"
-                    placeholder="Contenido de la nota"
-                    className="w-full p-3 border border-gray-300"
+                    placeholder="Escribe un hallazgo o comentario sobre esta fase..."
+                    className="w-full p-4 bg-[#0f172a] border border-slate-700 rounded-xl text-slate-300 placeholder:text-slate-600 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition-all resize-none min-h-[100px] font-mono text-sm"
                     {...register('content', {
-                        required: 'El Contenido de la nota es obligatorio'
+                        required: 'El contenido de la nota es obligatorio'
                     })}
                 />
                 {errors.content && (
@@ -60,11 +64,15 @@ export default function AddNoteForm() {
                 )}
             </div>
 
-            <input
+            <button
                 type="submit"
-                value='Crear Nota'
-                className=" bg-fuchsia-600 hover:bg-fuchsia-700 w-full p-2 text-white font-black cursor-pointer"
-            />
+                className="bg-cyan-600 hover:bg-cyan-500 w-full p-3 text-white font-black uppercase text-sm tracking-widest rounded-xl cursor-pointer transition-all shadow-lg shadow-cyan-900/20 active:scale-[0.98] flex justify-center items-center gap-2"
+            >
+                <span>Registrar Nota</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+            </button>
         </form>
     )
 }

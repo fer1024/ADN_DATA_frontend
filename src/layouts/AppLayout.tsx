@@ -15,13 +15,11 @@ export default function AppLayout() {
 
     if(data) return (
         <>
-            <header className='bg-gray-800 py-5'>
-                <div className=' max-w-screen-2xl mx-auto flex flex-col lg:flex-row justify-between items-center'>
-                    <div className='w-64'>
-                        <Link to={'/'}>
-                            <Logo />
-                        </Link>
-                    </div>
+            <header className='bg-gray-800 py-3 lg:py-5'>
+                <div className='max-w-screen-2xl mx-auto px-4 flex justify-between items-center gap-4'>
+                    <Link to={'/'}>
+                        <Logo />
+                    </Link>
 
                     <NavMenu 
                         name={data.name}

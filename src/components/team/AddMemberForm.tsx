@@ -40,7 +40,7 @@ export default function AddMemberForm() {
 
                 <div className="flex flex-col gap-3">
                     <label
-                        className="font-normal text-2xl"
+                        className="font-normal text-2xl text-white"
                         htmlFor="name"
                     >E-mail de Usuario</label>
                     <input
@@ -62,10 +62,10 @@ export default function AddMemberForm() {
                 </div>
 
                 <input
-                    type="submit"
-                    className=" bg-fuchsia-600 hover:bg-fuchsia-700 w-full p-3  text-white font-black  text-xl cursor-pointer"
-                    value='Buscar Usuario'
-                />
+    type="submit"
+    className="bg-cyan-600 hover:bg-cyan-500 w-full p-3 text-white font-black text-xl cursor-pointer transition-all rounded-xl shadow-lg shadow-cyan-900/20 active:scale-[0.98]"
+    value='Buscar Usuario'
+/>
             </form>
 
             <div className="mt-10">
