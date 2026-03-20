@@ -17,7 +17,7 @@ export default function Logo() {
           <img 
             src="/screen.png" 
             alt="Logotipo adn_data" 
-            className="w-full max-w-[100px] sm:max-w-[150px] md:max-w-[200px] lg:max-w-[250px] rounded-lg shadow-inner"
+            className="w-full max-w-[150px] sm:max-w-[200px] md:max-w-[350px] lg:max-w-[450px] rounded-lg shadow-inner"
           />
         </div>
         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-cyan-600 text-[10px] text-white font-bold px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 uppercase tracking-tighter">

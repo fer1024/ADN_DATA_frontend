@@ -42,7 +42,7 @@ export default function RegisterView() {
 
       <form
         onSubmit={handleSubmit(handleRegister)}
-        className="space-y-6 p-4 sm:p-10 bg-[#1e293b] mt-10 shadow-2xl rounded-2xl border border-slate-700/50"
+        className="space-y-5 p-3 sm:p-6 bg-[#1e293b] mt-6 sm:mt-10 shadow-2xl rounded-2xl border border-slate-700/50"
         noValidate
       >
         <div className="flex flex-col gap-3">

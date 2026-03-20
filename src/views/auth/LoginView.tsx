@@ -42,7 +42,7 @@ export default function LoginView() {
         </div>
 
         <div className="bg-[#1e293b] shadow-2xl rounded-2xl border border-slate-700/50 overflow-hidden">
-          <div className="p-4 sm:p-8">
+          <div className="p-3 sm:p-6">
             <h2 className="text-xl font-semibold text-white mb-2">Bienvenido a ADN DATA</h2>
             <p className="text-slate-400 text-sm mb-6">Ingresa al sistema</p>
 
