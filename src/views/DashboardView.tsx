@@ -80,7 +80,7 @@ export default function DashboardView() {
                                     </div>
                                 </div>
 
-                                <div className="flex shrink-0 items-center gap-x-6">
+                                <div className="flex sm:flex-col shrink-0 items-center gap-x-2 sm:gap-y-2">
                                     <Menu as="div" className="relative flex-none">
                                         <Menu.Button className="-m-2.5 block p-2.5 text-slate-500 hover:text-cyan-400 transition-colors">
                                             <span className="sr-only">opciones</span>
@@ -90,9 +90,8 @@ export default function DashboardView() {
                                             enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100"
                                             leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100"
                                             leaveTo="transform opacity-0 scale-95">
-                                            {/* Se aumenta z-index a 50 en Menu.Items */}
                                             <Menu.Items
-                                                className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-xl bg-[#0f172a] border border-slate-700 py-2 shadow-2xl ring-1 ring-black/5 focus:outline-none"
+                                                className="absolute right-0 sm:left-auto left-0 z-50 mt-2 w-56 origin-top-left rounded-xl bg-[#0f172a] border border-slate-700 py-2 shadow-2xl ring-1 ring-black/5 focus:outline-none"
                                             >
                                                 <Menu.Item>
                                                     <Link to={`/projects/${project._id}`}

@@ -4,11 +4,12 @@ import 'react-toastify/dist/ReactToastify.css'
 import Logo from '@/components/Logo'
 import NavMenu from '@/components/NavMenu'
 import { useAuth } from '@/hooks/useAuth'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 export default function AppLayout() {
 
-    const { data, isError, isLoading } = useAuth()
-    if(isLoading) return 'Cargando...'
+    const { data, isError, isLoading } = useAuth()
+    if(isLoading) return <LoadingSpinner />
     if(isError) {
         return <Navigate to='/auth/login' />
     }

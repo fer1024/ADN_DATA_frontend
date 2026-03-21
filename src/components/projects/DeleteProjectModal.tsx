@@ -70,35 +70,35 @@ export default function DeleteProjectModal() {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-3xl bg-[#0f172a] p-12 text-left align-middle shadow-2xl transition-all border border-cyan-500/20">
+                            <Dialog.Panel className="w-full max-w-md sm:max-w-2xl transform overflow-hidden rounded-2xl sm:rounded-3xl bg-[#0f172a] p-4 sm:p-12 text-left align-middle shadow-2xl transition-all border border-cyan-500/20">
 
                                 <Dialog.Title
                                     as="h3"
-                                    className="font-black text-4xl text-white my-5"
+                                    className="font-black text-2xl sm:text-4xl text-white my-3 sm:my-5"
                                 >
                                     Eliminar <span className="text-cyan-500">Proyecto</span>
                                 </Dialog.Title>
 
-                                <p className="text-xl font-light text-slate-400">
+                                <p className="text-base sm:text-xl font-light text-slate-400">
                                     Esta acción es irreversible. Confirma colocando tu {''}
                                     <span className="text-cyan-500/80 font-bold italic">password</span>
                                 </p>
 
                                 <form
-                                    className="mt-10 space-y-8"
+                                    className="mt-6 sm:mt-10 space-y-4 sm:space-y-8"
                                     onSubmit={handleSubmit(handleForm)}
                                     noValidate
                                 >
-                                    <div className="flex flex-col gap-3">
+                                    <div className="flex flex-col gap-2 sm:gap-3">
                                         <label
-                                            className="font-normal text-2xl text-slate-300"
+                                            className="font-normal text-base sm:text-2xl text-slate-300"
                                             htmlFor="password"
                                         >Password de confirmación</label>
                                         <input
                                             id="password"
                                             type="password"
                                             placeholder="Ingresa tu contraseña"
-                                            className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                                            className="w-full p-2 sm:p-4 bg-slate-800 border border-slate-700 rounded-lg sm:rounded-xl text-white focus:outline-none focus:border-cyan-500 transition-colors"
                                             {...register("password", {
                                                 required: "El password es obligatorio para eliminar",
                                             })}
@@ -110,13 +110,13 @@ export default function DeleteProjectModal() {
 
                                     <input
                                         type="submit"
-                                        className="bg-red-600 hover:bg-red-500 w-full p-4 text-white uppercase font-black text-xl cursor-pointer transition-all rounded-xl shadow-lg active:scale-[0.98]"
-                                        value='Eliminar Definitivamente'
+                                        className="bg-red-600 hover:bg-red-500 w-full p-2 sm:p-4 text-white uppercase font-black text-sm sm:text-xl cursor-pointer transition-all rounded-lg sm:rounded-xl shadow-lg active:scale-[0.98]"
+                                        value='Eliminar Proyecto'
                                     />
                                     
                                     <button
                                         type="button"
-                                        className="w-full text-slate-500 font-bold hover:text-slate-300 transition-colors"
+                                        className="w-full text-slate-500 font-bold text-sm sm:text-base hover:text-slate-300 transition-colors"
                                         onClick={() => navigate(location.pathname, { replace: true })}
                                     >
                                         Cancelar y volver
