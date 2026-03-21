@@ -71,6 +71,7 @@ function daysBetween(a: string | null | undefined, b: string | null | undefined)
 
 export default function ProjectReport({ project, show, onClose }: Props) {
     const reportRef = useRef<HTMLDivElement>(null)
+    const reportPDFRef = useRef<HTMLDivElement>(null)
     const [exporting, setExporting] = useState(false)
 
     const { data, isLoading } = useQuery({
@@ -80,17 +81,19 @@ export default function ProjectReport({ project, show, onClose }: Props) {
     })
 
     const exportPDF = async () => {
-        if (!reportRef.current) return
+        const elementToCapture = reportPDFRef.current || reportRef.current
+        if (!elementToCapture) return
         setExporting(true)
         try {
             const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
                 import('jspdf'),
                 import('html2canvas'),
             ])
-            const canvas = await html2canvas(reportRef.current, {
+            const canvas = await html2canvas(elementToCapture, {
                 scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff',
+                windowWidth: 1200,
             })
             const imgData = canvas.toDataURL('image/png')
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
@@ -163,20 +166,20 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                             enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
                             leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-[95vw] sm:max-w-5xl lg:max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+                            <Dialog.Panel className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
 
                                 {/* Toolbar */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-4 sm:px-8 py-4 bg-slate-50 border-b border-slate-200">
-                                    <h2 className="text-lg font-bold text-slate-800">Reporte del Proyecto</h2>
-                                    <div className="flex gap-3">
+                                <div className="flex items-center justify-between gap-3 px-6 py-4 bg-slate-50 border-b border-slate-200">
+                                    <h2 className="text-base sm:text-lg font-bold text-slate-800">Reporte del Proyecto</h2>
+                                    <div className="flex gap-2 sm:gap-3">
                                         <button
                                             onClick={exportPDF}
                                             disabled={exporting || isLoading}
-                                            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50"
+                                            className="px-3 sm:px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs sm:text-sm font-bold rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             {exporting ? 'Exportando...' : 'Exportar PDF'}
                                         </button>
-                                        <button onClick={onClose} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold rounded-lg transition-colors">
+                                        <button onClick={onClose} className="px-3 sm:px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs sm:text-sm font-bold rounded-lg transition-colors">
                                             Cerrar
                                         </button>
                                     </div>
@@ -187,7 +190,120 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                         <p className="text-slate-400 animate-pulse">Generando reporte...</p>
                                     </div>
                                 ) : (
-                                    <div ref={reportRef} className="bg-white p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+                                    <div className="hidden sm:block">
+                                        {/* Versión para PDF (siempre desktop) */}
+                                        <div 
+                                            ref={reportPDFRef} 
+                                            className="hidden bg-white p-6 space-y-6"
+                                            style={{ width: '1100px' }}
+                                        >
+                                            <div className="border-b-2 border-cyan-500 pb-6">
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <p className="text-xs font-bold uppercase tracking-widest text-cyan-600 mb-1">Reporte Ejecutivo · CRISP-DM</p>
+                                                        <h1 className="text-2xl font-black text-slate-900">{project.projectName}</h1>
+                                                        <p className="text-slate-500 mt-1">{project.description}</p>
+                                                        <p className="text-sm text-slate-400 mt-1">Cliente: <span className="font-semibold text-slate-600">{project.clientName}</span></p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-xs text-slate-400">Generado el</p>
+                                                        <p className="text-sm font-bold text-slate-700">{new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                                        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-50 rounded-full">
+                                                            <span className="text-2xl font-black text-cyan-600">{globalPct}%</span>
+                                                            <span className="text-xs text-cyan-500 font-medium">avance global</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <section>
+                                                <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                    <span className="w-3 h-3 rounded-full bg-cyan-500 inline-block"/>
+                                                    Progreso por Fase CRISP-DM
+                                                </h3>
+                                                <ResponsiveContainer width="100%" height={220}>
+                                                    <BarChart data={phaseProgressData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                                                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
+                                                        <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#64748b' }} unit="%" />
+                                                        <Tooltip formatter={(v) => [`${v}%`, 'Progreso']} />
+                                                        <Bar dataKey="progreso" radius={[4, 4, 0, 0]}>
+                                                            {phaseProgressData.map((entry, i) => (
+                                                                <Cell key={i} fill={entry.color} />
+                                                            ))}
+                                                        </Bar>
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </section>
+
+                                            <section className="grid grid-cols-2 gap-8">
+                                                <div>
+                                                    <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                        <span className="w-3 h-3 rounded-full bg-indigo-500 inline-block"/>
+                                                        Distribución por Estado
+                                                    </h3>
+                                                    {statusData.length === 0 ? (
+                                                        <p className="text-slate-400 text-sm">Sin tareas</p>
+                                                    ) : (
+                                                        <ResponsiveContainer width="100%" height={200}>
+                                                            <PieChart>
+                                                                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                                                                    {statusData.map((_, i) => <Cell key={i} fill={statusData[i].color} />)}
+                                                                </Pie>
+                                                                <Tooltip />
+                                                            </PieChart>
+                                                        </ResponsiveContainer>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                        <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"/>
+                                                        Tareas por Colaborador
+                                                    </h3>
+                                                    {collaboratorsData.length === 0 ? (
+                                                        <p className="text-slate-400 text-sm">Sin colaboradores</p>
+                                                    ) : (
+                                                        <ul className="space-y-2">
+                                                            {collaboratorsData.slice(0, 5).map(c => (
+                                                                <li key={c.name} className="flex items-center justify-between">
+                                                                    <span className="text-sm text-slate-600">{c.name}</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${c.completed}%` }} />
+                                                                        </div>
+                                                                        <span className="text-xs text-slate-400">{c.completed}%</span>
+                                                                    </div>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
+                                                </div>
+                                            </section>
+
+                                            {stalledTasks.length > 0 && (
+                                                <section className="border-t border-slate-200 pt-6">
+                                                    <h3 className="text-base font-black text-amber-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"/>
+                                                        Tareas Detenidas ({stalledTasks.length})
+                                                    </h3>
+                                                    <ul className="space-y-2">
+                                                        {stalledTasks.map(t => (
+                                                            <li key={t._id} className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                                                <span className="text-sm font-medium text-slate-800">{t.name}</span>
+                                                                <span className="text-xs text-amber-600">{phaseLabels[t.phase]}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
+
+                                            <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
+                                                <p className="text-xs text-slate-400">ADN DATA · Administración y Control de Datos</p>
+                                                <p className="text-xs text-slate-400">Generado con Pipeline CRISP-DM</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Versión visible */}
+                                        <div ref={reportRef} className="bg-white p-4 sm:p-6 space-y-4 sm:space-y-6">
 
                                         {/* Encabezado */}
                                         <div className="border-b-2 border-cyan-500 pb-4 sm:pb-6">
@@ -389,6 +505,8 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                         <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
                                             <p className="text-xs text-slate-400">ADN DATA · Administración y Control de Datos</p>
                                             <p className="text-xs text-slate-400">Generado con Pipeline CRISP-DM</p>
+                                        </div>
+                                        </div>
                                         </div>
                                     </div>
                                 )}

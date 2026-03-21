@@ -51,18 +51,9 @@ export default function ProjectDetailsView() {
                 </p>
             </motion.header>
 
-            <nav className="my-10 flex flex-col gap-4">
-                {/* Botones de gestión y visualización */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    {isManager(data.manager, user._id) && (
-                        <button
-                            type="button"
-                            className="bg-cyan-600 hover:bg-cyan-500 px-6 py-3 text-white text-lg font-black cursor-pointer transition-all rounded-lg shadow-lg shadow-cyan-900/20 active:scale-95 flex items-center justify-center gap-3"
-                            onClick={() => navigate(location.pathname + '?newTask=true')}
-                        >
-                            <span className="text-2xl">+</span> Agregar Tarea
-                        </button>
-                    )}
+            <nav className="my-10 flex flex-col sm:flex-row justify-between gap-4">
+                {/* Izquierda: Ver Dashboard y Reporte */}
+                <div className="flex flex-col sm:flex-row items-stretch gap-3">
                     {data.tasks.length > 0 && (
                         <button
                             type="button"
@@ -76,7 +67,7 @@ export default function ProjectDetailsView() {
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
-                            {showDashboard ? 'Ocultar Dashboard' : 'Ver Dashboard'}
+                            {showDashboard ? 'Ocultar' : 'Ver Dashboard'}
                         </button>
                     )}
                     <button
@@ -89,6 +80,19 @@ export default function ProjectDetailsView() {
                         </svg>
                         Reporte
                     </button>
+                </div>
+
+                {/* Derecha: Agregar Tarea y Colaboradores */}
+                <div className="flex flex-col sm:flex-row items-stretch gap-3">
+                    {isManager(data.manager, user._id) && (
+                        <button
+                            type="button"
+                            className="bg-cyan-600 hover:bg-cyan-500 px-6 py-3 text-white text-lg font-black cursor-pointer transition-all rounded-lg shadow-lg shadow-cyan-900/20 active:scale-95 flex items-center justify-center gap-3"
+                            onClick={() => navigate(location.pathname + '?newTask=true')}
+                        >
+                            <span className="text-2xl">+</span> Agregar Tarea
+                        </button>
+                    )}
                     <Link
                         to={'team'}
                         className="bg-slate-800 hover:bg-slate-700 px-6 py-3 text-white text-lg font-black cursor-pointer transition-all rounded-lg border border-slate-700 shadow-xl active:scale-95 flex items-center justify-center gap-3"
