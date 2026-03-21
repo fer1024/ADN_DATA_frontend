@@ -94,3 +94,15 @@ export async function toggleTaskCompleted({ projectId, taskId }: Pick<TaskAPI, '
         }
     }
 }
+
+export async function reassignTask({ projectId, taskId, assignedTo }: Pick<TaskAPI, 'projectId' | 'taskId'> & { assignedTo: string | null }) {
+    try {
+        const url = `/projects/${projectId}/tasks/${taskId}/reassign`
+        const { data } = await api.patch(url, { assignedTo })
+        return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error)
+        }
+    }
+}

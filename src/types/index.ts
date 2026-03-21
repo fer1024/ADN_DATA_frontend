@@ -24,6 +24,14 @@ export const userSchema = authSchema.pick({ name: true, email: true }).extend({ 
 export type User = z.infer<typeof userSchema>
 export type UserProfileForm = Pick<User, 'name' | 'email'>
 
+export const searchUserSchema = z.object({
+    _id: z.string(),
+    name: z.string(),
+    email: z.string(),
+    confirmed: z.boolean()
+})
+export type SearchUser = z.infer<typeof searchUserSchema>
+
 /** Notes */
 const noteSchema = z.object({
     _id: z.string(),

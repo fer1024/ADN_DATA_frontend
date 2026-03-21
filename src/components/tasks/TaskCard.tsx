@@ -31,6 +31,8 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
         }
     })
 
+    const isUnassigned = !task.assignedTo || (typeof task.assignedTo === 'string' && task.assignedTo === '')
+
     const style = transform ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
         padding: "1.25rem",
@@ -58,6 +60,11 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
                     <p className="text-sm font-black text-slate-200 tracking-tight line-clamp-1 uppercase font-mono">
                         {task.name}
                     </p>
+                    {isUnassigned && (
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+                            Sin asignar
+                        </span>
+                    )}
                 </div>
                 <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                     {task.description}

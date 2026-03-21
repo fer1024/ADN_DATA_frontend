@@ -52,3 +52,15 @@ export async function getProjectTeam(projectId: Project['_id']) {
         }
     }
 }
+
+export async function searchTeamMembers(projectId: Project['_id'], query: string) {
+    try {
+        const url = `/projects/${projectId}/team/search?q=${encodeURIComponent(query)}`
+        const { data } = await api(url)
+        return data
+    } catch (error) {
+        if(isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error)
+        }
+    }
+}
