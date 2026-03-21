@@ -2,10 +2,9 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { TaskCreateFormData } from '@/types/index';
 import { createTask } from '@/api/TaskAPI';
-import { getProjectTeam } from '@/api/TeamAPI';
 import { TaskCreateForm } from './TaskForm';
 import { toast } from 'react-toastify';
 
@@ -19,20 +18,17 @@ export default function AddTaskModal() {
     const params = useParams()
     const projectId = params.projectId!
 
-    const { data: team = [] } = useQuery({
-        queryKey: ['projectTeam', projectId],
-        queryFn: () => getProjectTeam(projectId),
-        enabled: show
-    })
-
     const initialValues: TaskCreateFormData = {
         name: '',
         description: '',
         phase: 'business',
-        assignedTo: ''
+        assignedTo: '',
+        estimatedHours: undefined,
+        priority: undefined,
+        deadline: undefined
     }
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskCreateFormData>({
+    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<TaskCreateFormData>({
         defaultValues: initialValues
     })
 
@@ -81,7 +77,7 @@ export default function AddTaskModal() {
                                     Registra una nueva unidad de trabajo en el <span className="text-cyan-500 font-bold">pipeline</span>
                                 </p>
                                 <form className="mt-10 space-y-5" onSubmit={handleSubmit(handleCreateTask)} noValidate>
-                                    <TaskCreateForm register={register} errors={errors} team={team} />
+                                    <TaskCreateForm register={register} errors={errors} setValue={setValue} />
                                     <input
                                         type="submit"
                                         className="bg-cyan-600 hover:bg-cyan-500 w-full p-4 text-white uppercase font-black text-xl cursor-pointer transition-all rounded-xl shadow-lg shadow-cyan-900/20 active:scale-[0.98] mt-5"

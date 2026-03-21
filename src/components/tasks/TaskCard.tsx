@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { Menu, Transition } from '@headlessui/react'
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -7,6 +7,7 @@ import { TaskProject } from "@/types/index"
 import { deleteTask } from '@/api/TaskAPI'
 import { toast } from 'react-toastify'
 import { useDraggable } from '@dnd-kit/core'
+import ReassignTaskModal from './ReassignTaskModal'
 
 type TaskCardProps = {
     task: TaskProject
@@ -21,6 +22,8 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
     const params = useParams()
     const projectId = params.projectId!
 
+    const [isReassignOpen, setIsReassignOpen] = useState(false)
+
     const queryClient = useQueryClient()
     const { mutate } = useMutation({
         mutationFn: deleteTask,
@@ -32,6 +35,28 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
     })
 
     const isUnassigned = !task.assignedTo || (typeof task.assignedTo === 'string' && task.assignedTo === '')
+
+    const priorityColors = {
+        high: 'bg-red-500/20 text-red-400 border-red-500/30',
+        medium: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+        low: 'bg-green-500/20 text-green-400 border-green-500/30',
+    }
+
+    const formatDeadline = (date: string) => {
+        const d = new Date(date)
+        return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })
+    }
+
+    const isDeadlineNear = (date: string) => {
+        const deadline = new Date(date)
+        const now = new Date()
+        const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        return diffDays <= 3
+    }
+
+    const isDeadlinePassed = (date: string) => {
+        return new Date(date) < new Date()
+    }
 
     const style = transform ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -70,10 +95,32 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
                     {task.description}
                 </p>
                 
-                <div className="mt-2 flex items-center gap-4">
+                <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-mono text-slate-600 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
                         ID-{task._id.slice(-4).toUpperCase()}
                     </span>
+                    
+                    {task.priority && (
+                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${priorityColors[task.priority]}`}>
+                            {task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Media' : 'Baja'}
+                        </span>
+                    )}
+                    
+                    {task.deadline && (
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                            isDeadlinePassed(task.deadline) ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                            isDeadlineNear(task.deadline) ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                            'bg-slate-800 text-slate-400 border-slate-700'
+                        }`}>
+                            📅 {formatDeadline(task.deadline)}
+                        </span>
+                    )}
+                    
+                    {task.estimatedHours && (
+                        <span className="text-[10px] font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+                            ⏱ {task.estimatedHours}h
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -112,6 +159,18 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
                                             <button
                                                 type='button'
                                                 className={`${active ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'} block w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors`}
+                                                onClick={() => setIsReassignOpen(true)}
+                                            >
+                                                Reasignar Tarea
+                                            </button>
+                                        )}
+                                    </Menu.Item>
+
+                                    <Menu.Item>
+                                        {({ active }) => (
+                                            <button
+                                                type='button'
+                                                className={`${active ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'} block w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors`}
                                                 onClick={() => navigate(location.pathname + `?editTask=${task._id}`)}
                                             >
                                                 Editar Nodo
@@ -136,6 +195,13 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
                     </Transition>
                 </Menu>
             </div>
+
+            <ReassignTaskModal
+                isOpen={isReassignOpen}
+                onClose={() => setIsReassignOpen(false)}
+                task={task}
+                projectId={projectId}
+            />
         </li>
     )
 }

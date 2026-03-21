@@ -33,7 +33,10 @@ export async function createDataset({ projectId, formData }: { projectId: string
         const { data } = await api.post<string>(`/projects/${projectId}/datasets`, formData)
         return data
     } catch (error) {
-        if (isAxiosError(error) && error.response) throw new Error(error.response.data.error)
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data?.error || 'Error al registrar el dataset')
+        }
+        throw new Error('Error de conexión al registrar el dataset')
     }
 }
 
@@ -66,7 +69,10 @@ export async function createExperiment({ projectId, formData }: { projectId: str
         const { data } = await api.post<string>(`/projects/${projectId}/experiments`, formData)
         return data
     } catch (error) {
-        if (isAxiosError(error) && error.response) throw new Error(error.response.data.error)
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data?.error || 'Error al registrar el experimento')
+        }
+        throw new Error('Error de conexión al registrar el experimento')
     }
 }
 
@@ -99,7 +105,10 @@ export async function createDecision({ projectId, formData }: { projectId: strin
         const { data } = await api.post<string>(`/projects/${projectId}/decisions`, formData)
         return data
     } catch (error) {
-        if (isAxiosError(error) && error.response) throw new Error(error.response.data.error)
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data?.error || 'Error al registrar la decisión')
+        }
+        throw new Error('Error de conexión al registrar la decisión')
     }
 }
 

@@ -85,6 +85,9 @@ export const taskProjectSchema = taskSchema.pick({
     assignedTo: z.union([userSchema, z.string()]).nullable().optional(),
     startedAt: z.string().nullable().optional(),
     finishedAt: z.string().nullable().optional(),
+    estimatedHours: z.number().nullable().optional(),
+    priority: z.enum(['high', 'medium', 'low']).nullable().optional(),
+    deadline: z.string().nullable().optional(),
 })
 
 export type Task = z.infer<typeof taskSchema>
@@ -97,7 +100,10 @@ export const taskCreateFormDataSchema = z.object({
     name: z.string(),
     description: z.string(),
     phase: taskPhaseSchema,
-    assignedTo: z.string().optional().default('')
+    assignedTo: z.string().optional().default(''),
+    estimatedHours: z.number().nullable().optional(),
+    priority: z.enum(['high', 'medium', 'low']).nullable().optional(),
+    deadline: z.string().nullable().optional(),
 })
 export type TaskCreateFormData = z.infer<typeof taskCreateFormDataSchema>
 
