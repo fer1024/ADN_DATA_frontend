@@ -57,18 +57,6 @@ function calcPhaseProgress(tasks: any[]): number {
     return Math.round(tasks.reduce((acc, t) => acc + (statusWeight[t.status] ?? 0), 0) / tasks.length)
 }
 
-function formatDate(dateStr: string | null | undefined): string {
-    if (!dateStr) return '—'
-    return new Date(dateStr).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function daysBetween(a: string | null | undefined, b: string | null | undefined): string {
-    if (!a) return '—'
-    const end = b ? new Date(b) : new Date()
-    const days = Math.floor((end.getTime() - new Date(a).getTime()) / 86400000)
-    return `${days} día${days !== 1 ? 's' : ''}`
-}
-
 export default function ProjectReport({ project, show, onClose }: Props) {
     const reportRef = useRef<HTMLDivElement>(null)
     const reportPDFRef = useRef<HTMLDivElement>(null)
@@ -114,9 +102,6 @@ export default function ProjectReport({ project, show, onClose }: Props) {
     }
 
     const tasks = data?.tasks ?? []
-    const datasets = data?.datasets ?? []
-    const experiments = data?.experiments ?? []
-    const decisions = data?.decisions ?? []
     const stalledTasks = data?.stalledTasks ?? []
 
     // Phase progress chart data
@@ -190,151 +175,124 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                         <p className="text-slate-400 animate-pulse">Generando reporte...</p>
                                     </div>
                                 ) : (
-                                    <div className="hidden sm:block">
-                                        {/* Versión para PDF (siempre desktop) */}
-                                        <div 
-                                            ref={reportPDFRef} 
-                                            className="hidden bg-white p-6 space-y-6"
-                                            style={{ width: '1100px' }}
-                                        >
-                                            <div className="border-b-2 border-cyan-500 pb-6">
-                                                <div className="flex items-start justify-between">
-                                                    <div>
-                                                        <p className="text-xs font-bold uppercase tracking-widest text-cyan-600 mb-1">Reporte Ejecutivo · CRISP-DM</p>
-                                                        <h1 className="text-2xl font-black text-slate-900">{project.projectName}</h1>
-                                                        <p className="text-slate-500 mt-1">{project.description}</p>
-                                                        <p className="text-sm text-slate-400 mt-1">Cliente: <span className="font-semibold text-slate-600">{project.clientName}</span></p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-xs text-slate-400">Generado el</p>
-                                                        <p className="text-sm font-bold text-slate-700">{new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                                                        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-50 rounded-full">
-                                                            <span className="text-2xl font-black text-cyan-600">{globalPct}%</span>
-                                                            <span className="text-xs text-cyan-500 font-medium">avance global</span>
+                                    <>
+                                        <div className="hidden sm:block">
+                                            <div ref={reportPDFRef} className="hidden bg-white p-6 space-y-6" style={{ width: '1100px' }}>
+                                                <div className="border-b-2 border-cyan-500 pb-6">
+                                                    <div className="flex items-start justify-between">
+                                                        <div>
+                                                            <p className="text-xs font-bold uppercase tracking-widest text-cyan-600 mb-1">Reporte Ejecutivo · CRISP-DM</p>
+                                                            <h1 className="text-2xl font-black text-slate-900">{project.projectName}</h1>
+                                                            <p className="text-slate-500 mt-1">{project.description}</p>
+                                                            <p className="text-sm text-slate-400 mt-1">Cliente: <span className="font-semibold text-slate-600">{project.clientName}</span></p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-xs text-slate-400">Generado el</p>
+                                                            <p className="text-sm font-bold text-slate-700">{new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                                            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-50 rounded-full">
+                                                                <span className="text-2xl font-black text-cyan-600">{globalPct}%</span>
+                                                                <span className="text-xs text-cyan-500 font-medium">avance global</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <section>
-                                                <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                    <span className="w-3 h-3 rounded-full bg-cyan-500 inline-block"/>
-                                                    Progreso por Fase CRISP-DM
-                                                </h3>
-                                                <ResponsiveContainer width="100%" height={220}>
-                                                    <BarChart data={phaseProgressData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                                                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
-                                                        <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#64748b' }} unit="%" />
-                                                        <Tooltip formatter={(v) => [`${v}%`, 'Progreso']} />
-                                                        <Bar dataKey="progreso" radius={[4, 4, 0, 0]}>
-                                                            {phaseProgressData.map((entry, i) => (
-                                                                <Cell key={i} fill={entry.color} />
-                                                            ))}
-                                                        </Bar>
-                                                    </BarChart>
-                                                </ResponsiveContainer>
-                                            </section>
-
-                                            <section className="grid grid-cols-2 gap-8">
-                                                <div>
+                                                <section>
                                                     <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                        <span className="w-3 h-3 rounded-full bg-indigo-500 inline-block"/>
-                                                        Distribución por Estado
+                                                        <span className="w-3 h-3 rounded-full bg-cyan-500 inline-block"/>
+                                                        Progreso por Fase CRISP-DM
                                                     </h3>
-                                                    {statusData.length === 0 ? (
-                                                        <p className="text-slate-400 text-sm">Sin tareas</p>
-                                                    ) : (
-                                                        <ResponsiveContainer width="100%" height={200}>
-                                                            <PieChart>
-                                                                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                                                                    {statusData.map((_, i) => <Cell key={i} fill={statusData[i].color} />)}
-                                                                </Pie>
-                                                                <Tooltip />
-                                                            </PieChart>
-                                                        </ResponsiveContainer>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                        <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"/>
-                                                        Tareas por Colaborador
-                                                    </h3>
-                                                    {collaboratorsData.length === 0 ? (
-                                                        <p className="text-slate-400 text-sm">Sin colaboradores</p>
-                                                    ) : (
-                                                        <ul className="space-y-2">
-                                                            {collaboratorsData.slice(0, 5).map(c => (
-                                                                <li key={c.name} className="flex items-center justify-between">
-                                                                    <span className="text-sm text-slate-600">{c.name}</span>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
-                                                                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${c.completed}%` }} />
+                                                    <ResponsiveContainer width="100%" height={220}>
+                                                        <BarChart data={phaseProgressData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                                                            <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
+                                                            <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#64748b' }} unit="%" />
+                                                            <Tooltip formatter={(v) => [`${v}%`, 'Progreso']} />
+                                                            <Bar dataKey="progreso" radius={[4, 4, 0, 0]}>
+                                                                {phaseProgressData.map((entry, i) => (
+                                                                    <Cell key={i} fill={entry.color} />
+                                                                ))}
+                                                            </Bar>
+                                                        </BarChart>
+                                                    </ResponsiveContainer>
+                                                </section>
+                                                <section className="grid grid-cols-2 gap-8">
+                                                    <div>
+                                                        <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                            <span className="w-3 h-3 rounded-full bg-indigo-500 inline-block"/>
+                                                            Distribución por Estado
+                                                        </h3>
+                                                        {statusData.length === 0 ? (
+                                                            <p className="text-slate-400 text-sm">Sin tareas</p>
+                                                        ) : (
+                                                            <ResponsiveContainer width="100%" height={200}>
+                                                                <PieChart>
+                                                                    <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                                                                        {statusData.map((_, i) => <Cell key={i} fill={statusData[i].color} />)}
+                                                                    </Pie>
+                                                                    <Tooltip />
+                                                                </PieChart>
+                                                            </ResponsiveContainer>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                            <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"/>
+                                                            Tareas por Colaborador
+                                                        </h3>
+                                                        {collaboratorData.length === 0 ? (
+                                                            <p className="text-slate-400 text-sm">Sin colaboradores</p>
+                                                        ) : (
+                                                            <ul className="space-y-2">
+                                                                {collaboratorData.slice(0, 5).map((c, i) => (
+                                                                    <li key={i} className="flex items-center justify-between">
+                                                                        <span className="text-sm text-slate-600">{c.name}</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                                                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${c.total > 0 ? Math.round((c.completed / c.total) * 100) : 0}%` }} />
+                                                                            </div>
+                                                                            <span className="text-xs text-slate-400">{c.total > 0 ? Math.round((c.completed / c.total) * 100) : 0}%</span>
                                                                         </div>
-                                                                        <span className="text-xs text-slate-400">{c.completed}%</span>
-                                                                    </div>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                </section>
+                                                {stalledTasks.length > 0 && (
+                                                    <section className="border-t border-slate-200 pt-6">
+                                                        <h3 className="text-base font-black text-amber-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"/>
+                                                            Tareas Detenidas ({stalledTasks.length})
+                                                        </h3>
+                                                        <ul className="space-y-2">
+                                                            {stalledTasks.map(t => (
+                                                                <li key={t._id} className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                                                    <span className="text-sm font-medium text-slate-800">{t.name}</span>
+                                                                    <span className="text-xs text-amber-600">{phaseLabels[t.phase as TaskPhase]}</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
-                                                    )}
-                                                </div>
-                                            </section>
-
-                                            {stalledTasks.length > 0 && (
-                                                <section className="border-t border-slate-200 pt-6">
-                                                    <h3 className="text-base font-black text-amber-600 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"/>
-                                                        Tareas Detenidas ({stalledTasks.length})
-                                                    </h3>
-                                                    <ul className="space-y-2">
-                                                        {stalledTasks.map(t => (
-                                                            <li key={t._id} className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                                                                <span className="text-sm font-medium text-slate-800">{t.name}</span>
-                                                                <span className="text-xs text-amber-600">{phaseLabels[t.phase]}</span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </section>
-                                            )}
-
-                                            <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
-                                                <p className="text-xs text-slate-400">ADN DATA · Administración y Control de Datos</p>
-                                                <p className="text-xs text-slate-400">Generado con Pipeline CRISP-DM</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Versión visible */}
-                                        <div ref={reportRef} className="bg-white p-4 sm:p-6 space-y-4 sm:space-y-6">
-
-                                        {/* Encabezado */}
-                                        <div className="border-b-2 border-cyan-500 pb-4 sm:pb-6">
-                                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                                                <div>
-                                                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-cyan-600 mb-1">Reporte Ejecutivo · CRISP-DM</p>
-                                                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900">{project.projectName}</h1>
-                                                    <p className="text-slate-500 mt-1">{project.description}</p>
-                                                    <p className="text-sm text-slate-400 mt-1">Cliente: <span className="font-semibold text-slate-600">{project.clientName}</span></p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-xs text-slate-400">Generado el</p>
-                                                    <p className="text-sm font-bold text-slate-700">{new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                                                    <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-50 rounded-full">
-                                                        <span className="text-2xl font-black text-cyan-600">{globalPct}%</span>
-                                                        <span className="text-xs text-cyan-500 font-medium">avance global</span>
-                                                    </div>
+                                                    </section>
+                                                )}
+                                                <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
+                                                    <p className="text-xs text-slate-400">ADN DATA · Administración y Control de Datos</p>
+                                                    <p className="text-xs text-slate-400">Generado con Pipeline CRISP-DM</p>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* 1. Progreso por fase */}
-                                        <section>
-                                            <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                <span className="w-3 h-3 rounded-full bg-cyan-500 inline-block"/>
-                                                Progreso por Fase CRISP-DM
-                                            </h3>
-                                            <ResponsiveContainer width="100%" height={220}>
+                                        <div ref={reportRef} className="sm:hidden bg-white p-4 space-y-4">
+                                            <div className="border-b-2 border-cyan-500 pb-4">
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-600 mb-1">Reporte Ejecutivo · CRISP-DM</p>
+                                                <h1 className="text-xl font-black text-slate-900">{project.projectName}</h1>
+                                                <p className="text-slate-500 mt-1 text-sm">{project.description}</p>
+                                                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-cyan-50 rounded-full">
+                                                    <span className="text-lg font-black text-cyan-600">{globalPct}%</span>
+                                                    <span className="text-xs text-cyan-500 font-medium">avance</span>
+                                                </div>
+                                            </div>
+                                            <ResponsiveContainer width="100%" height={180}>
                                                 <BarChart data={phaseProgressData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
-                                                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#64748b' }} unit="%" />
+                                                    <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#64748b' }} />
+                                                    <YAxis domain={[0, 100]} tick={{ fontSize: 8, fill: '#64748b' }} unit="%" />
                                                     <Tooltip formatter={(v) => [`${v}%`, 'Progreso']} />
                                                     <Bar dataKey="progreso" radius={[4, 4, 0, 0]}>
                                                         {phaseProgressData.map((entry, i) => (
@@ -343,172 +301,19 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                                     </Bar>
                                                 </BarChart>
                                             </ResponsiveContainer>
-                                        </section>
-
-                                        {/* 2. Distribución de estados + colaboradores */}
-                                        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-                                            <div>
-                                                <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                    <span className="w-3 h-3 rounded-full bg-indigo-500 inline-block"/>
-                                                    Distribución por Estado
-                                                </h3>
-                                                {statusData.length === 0 ? (
-                                                    <p className="text-slate-400 text-sm">Sin tareas registradas</p>
-                                                ) : (
-                                                    <ResponsiveContainer width="100%" height={200}>
-                                                        <PieChart>
-                                                            <Pie data={statusData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                                                                {statusData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                                                            </Pie>
-                                                            <Tooltip />
-                                                        </PieChart>
-                                                    </ResponsiveContainer>
-                                                )}
+                                            <div className="flex flex-wrap gap-2">
+                                                {statusData.map((d, i) => (
+                                                    <span key={i} className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: d.color + '20', color: d.color }}>
+                                                        {d.name}: {d.value}
+                                                    </span>
+                                                ))}
                                             </div>
-
-                                            <div>
-                                                <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                    <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"/>
-                                                    Carga por Colaborador
-                                                </h3>
-                                                {collaboratorData.length === 0 ? (
-                                                    <p className="text-slate-400 text-sm">Sin asignaciones registradas</p>
-                                                ) : (
-                                                    <div className="space-y-3">
-                                                        {collaboratorData.map((c, i) => (
-                                                            <div key={i}>
-                                                                <div className="flex justify-between text-sm mb-1">
-                                                                    <span className="font-medium text-slate-700">{c.name}</span>
-                                                                    <span className="text-slate-500">{c.completed}/{c.total} tareas</span>
-                                                                </div>
-                                                                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                                                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.round((c.completed / c.total) * 100)}%` }} />
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
+                                            <div className="border-t border-slate-200 pt-4 flex justify-between">
+                                                <p className="text-[10px] text-slate-400">ADN DATA</p>
+                                                <p className="text-[10px] text-slate-400">CRISP-DM</p>
                                             </div>
-                                        </section>
-
-                                        {/* 3. Tiempos de ejecución */}
-                                        <section>
-                                            <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                <span className="w-3 h-3 rounded-full bg-amber-500 inline-block"/>
-                                                Tiempos de Ejecución
-                                            </h3>
-                                            <table className="w-full text-sm border-collapse">
-                                                <thead>
-                                                    <tr className="bg-slate-50">
-                                                        <th className="text-left p-2 text-slate-600 font-bold border border-slate-200">Tarea</th>
-                                                        <th className="text-left p-2 text-slate-600 font-bold border border-slate-200">Fase</th>
-                                                        <th className="text-left p-2 text-slate-600 font-bold border border-slate-200">Inicio</th>
-                                                        <th className="text-left p-2 text-slate-600 font-bold border border-slate-200">Fin</th>
-                                                        <th className="text-left p-2 text-slate-600 font-bold border border-slate-200">Duración</th>
-                                                        <th className="text-left p-2 text-slate-600 font-bold border border-slate-200">Estado</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {tasks.length === 0 ? (
-                                                        <tr><td colSpan={6} className="p-3 text-slate-400 text-center border border-slate-200">Sin tareas</td></tr>
-                                                    ) : tasks.map((t: any) => (
-                                                        <tr key={t._id} className="hover:bg-slate-50">
-                                                            <td className="p-2 border border-slate-200 font-medium text-slate-800">{t.name}</td>
-                                                            <td className="p-2 border border-slate-200 text-slate-600">{phaseLabels[t.phase as TaskPhase] ?? t.phase}</td>
-                                                            <td className="p-2 border border-slate-200 text-slate-600">{formatDate(t.startedAt)}</td>
-                                                            <td className="p-2 border border-slate-200 text-slate-600">{formatDate(t.finishedAt)}</td>
-                                                            <td className="p-2 border border-slate-200 text-slate-600">{daysBetween(t.startedAt, t.finishedAt)}</td>
-                                                            <td className="p-2 border border-slate-200">
-                                                                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold text-white" style={{ background: statusColors[t.status] }}>
-                                                                    {statusLabels[t.status]}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </section>
-
-                                        {/* 4. Procesos estancados */}
-                                        {stalledTasks.length > 0 && (
-                                            <section>
-                                                <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                                    <span className="w-3 h-3 rounded-full bg-red-500 inline-block"/>
-                                                    Procesos Estancados (+7 días sin cambio)
-                                                </h3>
-                                                <div className="space-y-2">
-                                                    {stalledTasks.map((t: any) => (
-                                                        <div key={t._id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
-                                                            <div>
-                                                                <p className="font-bold text-slate-800 text-sm">{t.name}</p>
-                                                                <p className="text-xs text-slate-500">{phaseLabels[t.phase as TaskPhase]} · {statusLabels[t.status]}</p>
-                                                            </div>
-                                                            <span className="text-xs font-bold text-red-600">Sin cambios hace {daysBetween(t.updatedAt, null)}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </section>
-                                        )}
-
-                                        {/* 5. Trazabilidad */}
-                                        <section className="grid grid-cols-3 gap-6">
-                                            <div>
-                                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 inline-block"/>
-                                                    Datasets ({datasets.length})
-                                                </h3>
-                                                {datasets.length === 0
-                                                    ? <p className="text-slate-400 text-xs">Sin datasets</p>
-                                                    : datasets.map((d: any) => (
-                                                        <div key={d._id} className="mb-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                                                            <p className="text-xs font-bold text-slate-800">{d.name}</p>
-                                                            <p className="text-[11px] text-slate-500">{d.source}</p>
-                                                            <p className="text-[11px] text-slate-400">{phaseLabels[d.phase as TaskPhase]}</p>
-                                                        </div>
-                                                    ))
-                                                }
-                                            </div>
-                                            <div>
-                                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-fuchsia-500 inline-block"/>
-                                                    Experimentos ({experiments.length})
-                                                </h3>
-                                                {experiments.length === 0
-                                                    ? <p className="text-slate-400 text-xs">Sin experimentos</p>
-                                                    : experiments.map((e: any) => (
-                                                        <div key={e._id} className="mb-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                                                            <p className="text-xs font-bold text-slate-800">{e.name}</p>
-                                                            <p className="text-[11px] text-slate-500">{e.algorithmModel} · {e.metric}: {e.result}</p>
-                                                            <p className="text-[11px] text-slate-400">{phaseLabels[e.phase as TaskPhase]}</p>
-                                                        </div>
-                                                    ))
-                                                }
-                                            </div>
-                                            <div>
-                                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"/>
-                                                    Decisiones ({decisions.length})
-                                                </h3>
-                                                {decisions.length === 0
-                                                    ? <p className="text-slate-400 text-xs">Sin decisiones</p>
-                                                    : decisions.map((d: any) => (
-                                                        <div key={d._id} className="mb-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                                                            <p className="text-xs font-bold text-slate-800">{d.description}</p>
-                                                            <p className="text-[11px] text-slate-400">{phaseLabels[d.phase as TaskPhase]}</p>
-                                                        </div>
-                                                    ))
-                                                }
-                                            </div>
-                                        </section>
-
-                                        {/* Footer */}
-                                        <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
-                                            <p className="text-xs text-slate-400">ADN DATA · Administración y Control de Datos</p>
-                                            <p className="text-xs text-slate-400">Generado con Pipeline CRISP-DM</p>
                                         </div>
-                                        </div>
-                                        </div>
-                                    </div>
+                                    </>
                                 )}
                             </Dialog.Panel>
                         </Transition.Child>
