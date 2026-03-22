@@ -86,11 +86,11 @@ export default function ProjectTeamView() {
                                 <div className="h-12 w-12 rounded-full bg-cyan-500/30 border border-cyan-500/20 flex items-center justify-center">
                                     <span className="text-cyan-500 font-bold text-xl">{member.name.charAt(0)}</span>
                                 </div>
-                                <div className="min-w-0 flex-auto space-y-1">
-                                    <p className="text-xl font-black text-slate-200 group-hover:text-cyan-400 transition-colors">
+                                <div className="min-w-0 flex-auto max-w-[200px] sm:max-w-none space-y-1">
+                                    <p className="text-xl font-black text-slate-200 group-hover:text-cyan-400 transition-colors truncate">
                                         {member.name}
                                     </p>
-                                    <p className="text-sm text-white font-mono tracking-tight">
+                                    <p className="text-sm text-white font-mono tracking-tight truncate">
                                        {member.email}
                                     </p>
                                 </div>

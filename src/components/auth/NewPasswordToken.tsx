@@ -61,7 +61,7 @@ export default function NewPasswordToken({setToken, setIsValidToken }: NewPasswo
                 <label className="text-sm font-medium text-slate-300 ml-1 block mb-4">
                     Código de 6 dígitos
                 </label>
-                <div className="flex justify-center gap-3">
+                <div className="flex justify-center gap-2 sm:gap-3">
                     {digits.map((digit, index) => (
                         <input
                             key={index}
@@ -73,7 +73,7 @@ export default function NewPasswordToken({setToken, setIsValidToken }: NewPasswo
                             onChange={e => handleChange(index, e.target.value)}
                             onKeyDown={e => handleKeyDown(index, e)}
                             onPaste={handlePaste}
-                            className="w-11 h-12 text-center text-xl font-bold bg-[#0f172a] border border-slate-700 rounded-lg text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all caret-cyan-500"
+                            className="w-9 h-11 sm:w-11 sm:h-12 text-center text-lg sm:text-xl font-bold bg-[#0f172a] border border-slate-700 rounded-lg text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all caret-cyan-500"
                         />
                     ))}
                 </div>

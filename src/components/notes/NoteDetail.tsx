@@ -36,22 +36,22 @@ export default function NoteDetail({ note }: NoteDetailProps) {
     if (isLoading) return 'Cargando...'
 
     return (
-        <div className="p-3 flex justify-between items-center">
-            <div>
-                <p>
-                    {note.content} por: <span className="font-bold">{note.createdBy.name}</span>
+        <div className="p-3 flex justify-between items-start gap-3 bg-slate-800/30 rounded-lg mb-2">
+            <div className="flex-1">
+                <p className="text-slate-300">
+                    {note.content}
                 </p>
-                <p className="text-xs text-slate-500">
-                    {formatDate(note.createdAt)}
+                <p className="text-[10px] text-slate-500 mt-1">
+                    por <span className="font-bold text-slate-400">{note.createdBy.name}</span> · {formatDate(note.createdAt)}
                 </p>
             </div>
 
             {canDelete && (
                 <button
                     type="button"
-                    className="bg-red-400 hover:bg-red-500 p-2 text-xs text-white font-bold cursor-pointer transition-colors"
+                    className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 p-2 text-xs text-red-400 font-bold cursor-pointer transition-colors rounded-lg"
                     onClick={() => mutate({projectId, taskId, noteId: note._id})}
-                >Eliminar</button>
+                >✕</button>
             )}
         </div>
     )
