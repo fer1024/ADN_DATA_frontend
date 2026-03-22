@@ -78,49 +78,72 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                 import('html2canvas'),
             ])
             
+            const isMobile = window.innerWidth < 768
             const orientation = 'portrait'
             const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' })
             const pageW = pdf.internal.pageSize.getWidth()
             const pageH = pdf.internal.pageSize.getHeight()
             
-            const element = reportRef.current
-            const originalOverflow = element.style.overflow
-            const originalMaxHeight = element.style.maxHeight
-            
-            element.style.overflow = 'visible'
-            element.style.maxHeight = 'none'
-            
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-            })
-            
-            element.style.overflow = originalOverflow
-            element.style.maxHeight = originalMaxHeight
-            
-            const imgW = canvas.width
-            const imgH = canvas.height
-            const ratio = pageW / imgW
-            const pageHeightPx = pageH / ratio
-            
-            const totalPages = Math.ceil(imgH / pageHeightPx)
-            
-            for (let i = 0; i < totalPages; i++) {
-                if (i > 0) pdf.addPage()
+            if (isMobile) {
+                const sections = reportRef.current.children as HTMLCollectionOf<HTMLElement>
                 
-                const sliceHeight = Math.min(pageHeightPx, imgH - (i * pageHeightPx))
+                for (let i = 0; i < sections.length; i++) {
+                    const section = sections[i]
+                    const canvas = await html2canvas(section, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                    })
+                    
+                    const imgData = canvas.toDataURL('image/png')
+                    const imgW = canvas.width
+                    const imgH = canvas.height
+                    const ratio = pageW / imgW
+                    const imgH_mm = imgH * ratio
+                    
+                    if (i > 0) pdf.addPage()
+                    pdf.addImage(imgData, 'PNG', 0, 0, pageW, imgH_mm)
+                }
+            } else {
+                const element = reportRef.current
+                const originalOverflow = element.style.overflow
+                const originalMaxHeight = element.style.maxHeight
                 
-                const tempCanvas = document.createElement('canvas')
-                tempCanvas.width = imgW
-                tempCanvas.height = sliceHeight
-                const ctx = tempCanvas.getContext('2d')!
-                ctx.fillStyle = '#ffffff'
-                ctx.fillRect(0, 0, imgW, sliceHeight)
-                ctx.drawImage(canvas, 0, i * pageHeightPx, imgW, sliceHeight, 0, 0, imgW, sliceHeight)
+                element.style.overflow = 'visible'
+                element.style.maxHeight = 'none'
                 
-                const pageData = tempCanvas.toDataURL('image/png')
-                pdf.addImage(pageData, 'PNG', 0, 0, pageW, sliceHeight * ratio)
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                })
+                
+                element.style.overflow = originalOverflow
+                element.style.maxHeight = originalMaxHeight
+                
+                const imgW = canvas.width
+                const imgH = canvas.height
+                const ratio = pageW / imgW
+                const pageHeightPx = pageH / ratio
+                
+                const totalPages = Math.ceil(imgH / pageHeightPx)
+                
+                for (let i = 0; i < totalPages; i++) {
+                    if (i > 0) pdf.addPage()
+                    
+                    const sliceHeight = Math.min(pageHeightPx, imgH - (i * pageHeightPx))
+                    
+                    const tempCanvas = document.createElement('canvas')
+                    tempCanvas.width = imgW
+                    tempCanvas.height = sliceHeight
+                    const ctx = tempCanvas.getContext('2d')!
+                    ctx.fillStyle = '#ffffff'
+                    ctx.fillRect(0, 0, imgW, sliceHeight)
+                    ctx.drawImage(canvas, 0, i * pageHeightPx, imgW, sliceHeight, 0, 0, imgW, sliceHeight)
+                    
+                    const pageData = tempCanvas.toDataURL('image/png')
+                    pdf.addImage(pageData, 'PNG', 0, 0, pageW, sliceHeight * ratio)
+                }
             }
             
             pdf.save(`reporte-${project.projectName.replace(/\s+/g, '-')}.pdf`)
@@ -192,7 +215,7 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                             enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
                             leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+                            <Dialog.Panel className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl">
 
                                 {/* Toolbar */}
                                 <div className="flex items-center justify-between gap-3 px-6 py-4 bg-slate-50 border-b border-slate-200">
@@ -219,11 +242,18 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                     <div ref={reportRef} className="bg-white p-3 sm:p-6 space-y-4 sm:space-y-6 max-h-[70vh] overflow-y-auto">
                                         <div className="border-b-2 border-cyan-500 pb-3 sm:pb-6">
                                             <div className="flex items-start justify-between flex-wrap gap-2 sm:gap-4">
-                                                <div>
-                                                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-cyan-600 mb-1">Reporte Ejecutivo · CRISP-DM</p>
-                                                    <h1 className="text-lg sm:text-2xl font-black text-slate-900">{project.projectName}</h1>
-                                                    <p className="text-slate-500 mt-1 text-xs sm:text-sm">{project.description}</p>
-                                                    <p className="text-xs sm:text-sm text-slate-400 mt-1">Cliente: <span className="font-semibold text-slate-600">{project.clientName}</span></p>
+                                                <div className="flex items-center gap-3">
+                                                    <img 
+                                                        src="/screen.png" 
+                                                        alt="ADN DATA" 
+                                                        className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                                                    />
+                                                    <div>
+                                                        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-cyan-600 mb-1">Reporte Ejecutivo · CRISP-DM</p>
+                                                        <h1 className="text-lg sm:text-2xl font-black text-slate-900">{project.projectName}</h1>
+                                                        <p className="text-slate-500 mt-1 text-xs sm:text-sm">{project.description}</p>
+                                                        <p className="text-xs sm:text-sm text-slate-400 mt-1">Cliente: <span className="font-semibold text-slate-600">{project.clientName}</span></p>
+                                                    </div>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-[10px] sm:text-xs text-slate-400">Generado el</p>
@@ -236,38 +266,33 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                             </div>
                                         </div>
                                         {/* Pipeline CRISP-DM Semáforo */}
-                                        <section className="border border-slate-200 rounded-xl p-3 sm:p-4">
-                                            <h3 className="text-xs sm:text-base font-black text-slate-800 uppercase tracking-wider mb-3 sm:mb-4 flex items-center gap-2">
-                                                <span className="w-2 sm:w-3 h-2 sm:h-3 rounded-full bg-cyan-500 inline-block"/>
+                                        <section className="border border-slate-200 rounded-xl p-4 sm:p-6 mb-8">
+                                            <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-cyan-500 inline-block"/>
                                                 Pipeline CRISP-DM
                                             </h3>
-                                            <div className="flex items-center justify-between gap-1 overflow-x-auto">
-                                                {phaseOrder.map((phase, i) => {
+                                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
+                                                {phaseOrder.map((phase) => {
                                                     const progress = calcPhaseProgress(tasks.filter((t: any) => t.phase === phase))
                                                     const semColor = getSemaphoreColor(progress)
                                                     const count = tasks.filter((t: any) => t.phase === phase).length
                                                     return (
-                                                        <div key={phase} className="flex items-center">
-                                                            <div className="flex flex-col items-center min-w-[60px] sm:min-w-[80px]">
-                                                                <div 
-                                                                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-[2px]"
-                                                                    style={{ 
-                                                                        backgroundColor: `${semColor}15`,
-                                                                        borderColor: semColor,
-                                                                    }}
-                                                                >
-                                                                    <span className="text-sm sm:text-lg font-black" style={{ color: semColor }}>
-                                                                        {progress}%
-                                                                    </span>
-                                                                </div>
-                                                                <span className="text-[9px] sm:text-[10px] text-slate-500 mt-1 text-center leading-tight">
-                                                                    {phaseLabels[phase]}
+                                                        <div key={phase} className="flex flex-col items-center">
+                                                            <div 
+                                                                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2"
+                                                                style={{ 
+                                                                    backgroundColor: `${semColor}15`,
+                                                                    borderColor: semColor,
+                                                                }}
+                                                            >
+                                                                <span className="text-sm sm:text-base font-black" style={{ color: semColor }}>
+                                                                    {progress}%
                                                                 </span>
-                                                                <span className="text-[8px] sm:text-[9px] text-slate-400">{count} tareas</span>
                                                             </div>
-                                                            {i < phaseOrder.length - 1 && (
-                                                                <div className="w-2 sm:w-4 h-0.5 bg-slate-300 mx-0.5 flex-shrink-0" />
-                                                            )}
+                                                            <span className="text-[9px] sm:text-[10px] text-slate-500 mt-1 text-center leading-tight">
+                                                                {phaseLabels[phase]}
+                                                            </span>
+                                                            <span className="text-[8px] sm:text-[9px] text-slate-400">{count} tareas</span>
                                                         </div>
                                                     )
                                                 })}
@@ -275,9 +300,9 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                         </section>
 
                                         {/* Trazabilidad por fase */}
-                                        <section className="border border-slate-200 rounded-xl p-3 sm:p-4">
-                                            <h3 className="text-xs sm:text-base font-black text-slate-800 uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2">
-                                                <span className="w-2 sm:w-3 h-2 sm:h-3 rounded-full bg-indigo-500 inline-block"/>
+                                        <section className="border border-slate-200 rounded-xl p-4 sm:p-6 mb-8">
+                                            <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"/>
                                                 Trazabilidad por Fase
                                             </h3>
                                             <div className="space-y-2">
@@ -317,9 +342,9 @@ export default function ProjectReport({ project, show, onClose }: Props) {
 
                                         {/* Mejores experimentos */}
                                         {topExperiments.length > 0 && (
-                                            <section className="border border-slate-200 rounded-xl p-3 sm:p-4">
-                                                <h3 className="text-xs sm:text-base font-black text-slate-800 uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2">
-                                                    <span className="w-2 sm:w-3 h-2 sm:h-3 rounded-full bg-yellow-500 inline-block"/>
+                                            <section className="border border-slate-200 rounded-xl p-4 sm:p-6 mb-8">
+                                                <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                    <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block"/>
                                                     Mejores Experimentos
                                                 </h3>
                                                 <div className="space-y-2">
@@ -348,18 +373,20 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                             </section>
                                         )}
 
-                                        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+                                        <div className="h-8 sm:h-12" />
+
+                                        <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                                             <div>
-                                                <h3 className="text-xs sm:text-base font-black text-slate-800 uppercase tracking-wider mb-2 sm:mb-4 flex items-center gap-2">
-                                                    <span className="w-2 sm:w-3 h-2 sm:h-3 rounded-full bg-indigo-500 inline-block"/>
+                                                <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                    <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"/>
                                                     Distribución por Estado
                                                 </h3>
                                                 {statusData.length === 0 ? (
-                                                    <p className="text-slate-400 text-xs sm:text-sm">Sin tareas</p>
+                                                    <p className="text-slate-400 text-xs">Sin tareas</p>
                                                 ) : (
-                                                    <ResponsiveContainer width="100%" height={140} className="sm:!h-[200px]">
+                                                    <ResponsiveContainer width="100%" height={140} className="sm:!h-[160px]">
                                                         <PieChart>
-                                                            <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={50} className="sm:!outer-radius-[80px]" label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                                                            <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={50} className="sm:!outer-radius-[60px]" label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
                                                                 {statusData.map((_, i) => <Cell key={i} fill={statusData[i].color} />)}
                                                             </Pie>
                                                             <Tooltip />
@@ -368,19 +395,19 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                                 )}
                                             </div>
                                             <div>
-                                                <h3 className="text-xs sm:text-base font-black text-slate-800 uppercase tracking-wider mb-2 sm:mb-4 flex items-center gap-2">
-                                                    <span className="w-2 sm:w-3 h-2 sm:h-3 rounded-full bg-emerald-500 inline-block"/>
+                                                <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>
                                                     Tareas por Colaborador
                                                 </h3>
                                                 {collaboratorData.length === 0 ? (
-                                                    <p className="text-slate-400 text-xs sm:text-sm">Sin colaboradores</p>
+                                                    <p className="text-slate-400 text-xs">Sin colaboradores</p>
                                                 ) : (
-                                                    <ul className="space-y-1 sm:space-y-2">
+                                                    <ul className="space-y-2">
                                                         {collaboratorData.slice(0, 3).map((c, i) => (
                                                             <li key={i} className="flex items-center justify-between">
-                                                                <span className="text-xs sm:text-sm text-slate-600">{c.name}</span>
-                                                                <div className="flex items-center gap-1 sm:gap-2">
-                                                                    <div className="w-16 sm:w-24 h-1.5 sm:h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                                <span className="text-xs text-slate-600">{c.name}</span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-16 sm:w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
                                                                         <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${c.total > 0 ? Math.round((c.completed / c.total) * 100) : 0}%` }} />
                                                                     </div>
                                                                     <span className="text-[10px] sm:text-xs text-slate-400">{c.total > 0 ? Math.round((c.completed / c.total) * 100) : 0}%</span>
@@ -392,12 +419,12 @@ export default function ProjectReport({ project, show, onClose }: Props) {
                                             </div>
                                         </section>
                                         {stalledTasks.length > 0 && (
-                                            <section className="border-t border-slate-200 pt-3 sm:pt-6">
-                                                <h3 className="text-xs sm:text-base font-black text-amber-600 uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2">
-                                                    <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-amber-500 inline-block"/>
+                                            <section className="border-t border-slate-200 pt-4 sm:pt-6">
+                                                <h3 className="text-xs sm:text-sm font-black text-amber-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                    <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"/>
                                                     Tareas Detenidas ({stalledTasks.length})
                                                 </h3>
-                                                <ul className="space-y-1 sm:space-y-2">
+                                                <ul className="space-y-2">
                                                     {stalledTasks.slice(0, 5).map(t => (
                                                         <li key={t._id} className="flex items-center justify-between p-2 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg">
                                                             <span className="text-xs sm:text-sm font-medium text-slate-800">{t.name}</span>

@@ -1,9 +1,9 @@
 import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { reassignTask } from '@/api/TaskAPI'
-import { TaskProject } from '@/types/index'
-import UserAutocomplete from '../team/UserAutocomplete'
+import { getProjectTeam } from '@/api/TeamAPI'
+import { TaskProject, TeamMember } from '@/types/index'
 import { toast } from 'react-toastify'
 
 type ReassignTaskModalProps = {
@@ -16,24 +16,26 @@ type ReassignTaskModalProps = {
 export default function ReassignTaskModal({ isOpen, onClose, task, projectId }: ReassignTaskModalProps) {
     const queryClient = useQueryClient()
     
+    const { data: team = [] } = useQuery({
+        queryKey: ['projectTeam', projectId],
+        queryFn: () => getProjectTeam(projectId),
+        enabled: isOpen
+    })
+
     const { mutate, isPending } = useMutation({
         mutationFn: (assignedTo: string | null) => 
             reassignTask({ projectId, taskId: task._id, assignedTo }),
         onError: (error) => toast.error(error.message),
-        onSuccess: (data) => {
-            toast.success(data)
+        onSuccess: (data: any) => {
+            toast.success(data.message || 'Tarea reasignada correctamente')
             queryClient.invalidateQueries({ queryKey: ['project', projectId] })
             onClose()
         }
     })
 
-    const handleReassign = (assignedTo: string) => {
-        mutate(assignedTo || null)
-    }
-
-    const handleUnassign = () => {
-        mutate(null)
-    }
+    const currentAssignedTo = task.assignedTo && typeof task.assignedTo === 'object' 
+        ? (task.assignedTo as TeamMember)._id 
+        : ''
 
     return (
         <Transition appear show={isOpen} as={Fragment}>
@@ -53,13 +55,13 @@ export default function ReassignTaskModal({ isOpen, onClose, task, projectId }: 
                             enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
                             leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-[#1e293b] text-left align-middle shadow-2xl transition-all border border-slate-700 p-6">
+                            <Dialog.Panel className="w-full max-w-lg transform rounded-2xl bg-[#1e293b] text-left align-middle shadow-2xl transition-all border border-slate-700 p-6 max-h-[90vh] overflow-y-auto">
                                 <Dialog.Title as="h3" className="font-black text-2xl text-white tracking-tight">
                                     Reasignar <span className="text-cyan-500">Tarea</span>
                                 </Dialog.Title>
                                 
                                 <p className="text-sm text-slate-400 mt-2 mb-6">
-                                    Asigna esta tarea a otro colaborador o desasígnala
+                                    Selecciona un colaborador o desasigna la tarea
                                 </p>
 
                                 <div className="mb-4">
@@ -68,17 +70,31 @@ export default function ReassignTaskModal({ isOpen, onClose, task, projectId }: 
                                 </div>
 
                                 <div className="mb-6">
-                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Buscar Colaborador</p>
-                                    <UserAutocomplete
-                                        value=""
-                                        onChange={handleReassign}
-                                    />
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">
+                                        Seleccionar Colaborador
+                                    </label>
+                                    <select
+                                        className="w-full p-4 bg-[#0f172a] border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500 transition-all cursor-pointer"
+                                        value={currentAssignedTo}
+                                        onChange={(e) => {
+                                            const value = e.target.value
+                                            mutate(value || null)
+                                        }}
+                                        disabled={isPending}
+                                    >
+                                        <option value="" className="bg-[#0f172a] text-slate-500">— Sin asignar —</option>
+                                        {team.map(member => (
+                                            <option key={member._id} value={member._id} className="bg-[#0f172a]">
+                                                {member.name} · {member.email}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className="flex gap-3">
                                     <button
                                         type="button"
-                                        onClick={handleUnassign}
+                                        onClick={() => mutate(null)}
                                         disabled={isPending}
                                         className="flex-1 px-4 py-3 bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 border border-amber-500/30 rounded-xl font-bold text-sm uppercase tracking-wider transition-colors disabled:opacity-50"
                                     >

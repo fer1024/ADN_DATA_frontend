@@ -40,7 +40,7 @@ export default function AddMemberModal() {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-md sm:max-w-4xl transform overflow-hidden rounded-2xl sm:rounded-3xl bg-[#1e293b] text-left align-middle shadow-2xl transition-all p-4 sm:p-8 lg:p-16 border border-slate-700 relative">
+                                <Dialog.Panel className="w-full max-w-md sm:max-w-lg transform rounded-2xl sm:rounded-3xl bg-[#1e293b] text-left align-middle shadow-2xl transition-all p-4 sm:p-8 border border-slate-700 relative max-h-[90vh] overflow-y-auto">
                                     
                                     {/* Acento estético de red */}
                                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
@@ -53,7 +53,7 @@ export default function AddMemberModal() {
                                     </Dialog.Title>
 
                                     <p className="text-base sm:text-xl font-light text-slate-400">
-                                        Busca el nuevo integrante por email para <span className="text-cyan-500 font-bold uppercase tracking-wider">sincronizarlo</span> al proyecto
+                                        Agrega un nuevo integrante por email o nombre para <span className="text-cyan-500 font-bold uppercase tracking-wider">sincronizarlo</span> al proyecto
                                     </p>
 
                                     <div className="mt-10">

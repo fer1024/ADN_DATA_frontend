@@ -1,7 +1,6 @@
-import { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form"
-import { TaskFormData, TaskCreateFormData } from "@/types/index"
+import { FieldErrors, UseFormRegister } from "react-hook-form"
+import { TaskFormData, TaskCreateFormData, TeamMember } from "@/types/index"
 import ErrorMessage from "../ErrorMessage"
-import UserAutocomplete from "../team/UserAutocomplete"
 
 const crispDMPhases: { value: TaskCreateFormData['phase']; label: string }[] = [
     { value: 'business',          label: '01 · Business Understanding' },
@@ -64,9 +63,9 @@ export default function TaskForm({ errors, register }: TaskFormProps) {
 type TaskCreateFormProps = {
     errors: FieldErrors<TaskCreateFormData>
     register: UseFormRegister<TaskCreateFormData>
-    setValue: UseFormSetValue<TaskCreateFormData>
+    team: TeamMember[]
 }
-export function TaskCreateForm({ errors, register, setValue }: TaskCreateFormProps) {
+export function TaskCreateForm({ errors, register, team }: TaskCreateFormProps) {
     return (
         <>
             <BaseFields
@@ -95,10 +94,19 @@ export function TaskCreateForm({ errors, register, setValue }: TaskCreateFormPro
                 <label className="font-bold text-sm uppercase text-slate-300 tracking-[0.15em] ml-1" htmlFor="assignedTo">
                     Colaborador Asignado
                 </label>
-                <UserAutocomplete
-                    value=""
-                    onChange={(userId) => setValue("assignedTo", userId)}
-                />
+                <select
+                    id="assignedTo"
+                    className="w-full p-4 bg-[#0f172a] border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500 transition-all cursor-pointer"
+                    {...register("assignedTo")}
+                >
+                    <option value="" className="bg-[#0f172a] text-slate-500">— Sin asignar —</option>
+                    {team.map(member => (
+                        <option key={member._id} value={member._id} className="bg-[#0f172a]">
+                            {member.name} · {member.email}
+                        </option>
+                    ))}
+                </select>
+                {errors.assignedTo && <ErrorMessage>{errors.assignedTo.message}</ErrorMessage>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

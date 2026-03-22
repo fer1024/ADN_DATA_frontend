@@ -70,6 +70,9 @@ export const taskSchema = z.object({
         status: taskStatusSchema
     })),
     notes: z.array(noteSchema.extend({ createdBy: userSchema })),
+    estimatedHours: z.number().nullable().optional(),
+    priority: z.enum(['high', 'medium', 'low']).nullable().optional(),
+    deadline: z.string().nullable().optional(),
     createdAt: z.string(),
     updatedAt: z.string()
 })

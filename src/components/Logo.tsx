@@ -28,9 +28,6 @@ export default function Logo({ variant = 'app' }: LogoProps) {
             className={`w-full ${sizeClasses} rounded-lg shadow-inner`}
           />
         </div>
-        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-cyan-600 text-[10px] text-white font-bold px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 uppercase tracking-tighter">
-          Engine v1.0
-        </div>
       </motion.div>
     </div>
   )

@@ -3,8 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getFullProject } from "@/api/ProjectAPI"
 import AddTaskModal from "@/components/tasks/AddTaskModal"
 import TaskList from "@/components/tasks/TaskList"
-import EditTaskData from "@/components/tasks/EditTaskData"
-import TaskModalDetails from "@/components/tasks/TaskModalDetails"
+import TaskDetailsModal from "@/components/tasks/TaskDetailsModal"
 import ProjectReport from "@/components/tasks/ProjectReport"
 import ProjectDashboard from "@/components/tasks/ProjectDashboard"
 import { useAuth } from "@/hooks/useAuth"
@@ -111,8 +110,7 @@ export default function ProjectDetailsView() {
             </div>
 
             <AddTaskModal />
-            <EditTaskData />
-            <TaskModalDetails />
+            <TaskDetailsModal />
             <ProjectReport
                 project={data}
                 show={showReport}

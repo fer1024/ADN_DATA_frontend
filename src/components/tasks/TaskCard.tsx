@@ -147,7 +147,7 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
                                         className={`${active ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'} block w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors`}
                                         onClick={() => navigate(location.pathname + `?viewTask=${task._id}`)}
                                     >
-                                        Detalles Logs
+                                        Ver Detalles
                                     </button>
                                 )}
                             </Menu.Item>
@@ -161,19 +161,7 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
                                                 className={`${active ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'} block w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors`}
                                                 onClick={() => setIsReassignOpen(true)}
                                             >
-                                                Reasignar Tarea
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                type='button'
-                                                className={`${active ? 'bg-slate-800 text-cyan-400' : 'text-slate-300'} block w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors`}
-                                                onClick={() => navigate(location.pathname + `?editTask=${task._id}`)}
-                                            >
-                                                Editar Nodo
+                                                Reasignar
                                             </button>
                                         )}
                                     </Menu.Item>
@@ -185,7 +173,7 @@ export default function TaskCard({ task, canEdit }: TaskCardProps) {
                                                 className={`${active ? 'bg-red-500/10 text-red-500' : 'text-red-500/80'} block w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors`}
                                                 onClick={() => mutate({ projectId, taskId: task._id })}
                                             >
-                                                Eliminar Registro
+                                                Eliminar
                                             </button>
                                         )}
                                     </Menu.Item>

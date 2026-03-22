@@ -53,6 +53,12 @@ function parseMetric(result: string): number {
     return isNaN(num) ? 0 : num
 }
 
+function getDaysUntil(dateStr: string): number {
+    const deadline = new Date(dateStr)
+    const now = new Date()
+    return Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+}
+
 export default function ProjectDashboard({ projectId }: Props) {
     const { data, isLoading } = useQuery({
         queryKey: ['report', projectId],
@@ -118,6 +124,21 @@ export default function ProjectDashboard({ projectId }: Props) {
     })
     const collabData = Object.values(collabMap)
 
+    // Tareas próximas a vencer (en 7 días) y vencidas
+    const now = new Date()
+    const tasksWithDeadline = tasks.filter((t: any) => t.deadline && t.status !== 'completed')
+    const overdueTasks = tasksWithDeadline.filter((t: any) => new Date(t.deadline) < now)
+    const upcomingTasks = tasksWithDeadline
+        .filter((t: any) => {
+            const days = getDaysUntil(t.deadline)
+            return days >= 0 && days <= 7
+        })
+        .sort((a: any, b: any) => getDaysUntil(a.deadline) - getDaysUntil(b.deadline))
+        .slice(0, 5)
+
+    // Tareas por prioridad
+    const highPriorityTasks = tasks.filter((t: any) => t.priority === 'high' && t.status !== 'completed').length
+
     return (
         <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -138,33 +159,35 @@ export default function ProjectDashboard({ projectId }: Props) {
             {/* Pipeline CRISP-DM Semáforo */}
             <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3">Pipeline CRISP-DM</p>
-                <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
-                    {phaseOrder.map((phase, i) => {
-                        const progress = calcPhaseProgress(tasks.filter((t: any) => t.phase === phase))
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4">
+                    {phaseOrder.map((phase) => {
+                        const phaseTasks = tasks.filter((t: any) => t.phase === phase)
+                        const progress = calcPhaseProgress(phaseTasks)
                         const semColor = getSemaphoreColor(progress)
-                        const count = tasks.filter((t: any) => t.phase === phase).length
+                        const count = phaseTasks.length
+                        const highPri = phaseTasks.filter((t: any) => t.priority === 'high' && t.status !== 'completed').length
                         return (
-                            <div key={phase} className="flex items-center">
-                                <div className="flex flex-col items-center min-w-[80px] sm:min-w-[100px] md:min-w-[120px]">
-                                    <div 
-                                        className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center border-[3px]"
-                                        style={{ 
-                                            backgroundColor: `${semColor}20`,
-                                            borderColor: semColor,
-                                        }}
-                                    >
-                                        <span className="text-sm sm:text-base md:text-lg font-black" style={{ color: semColor }}>
-                                            {progress}%
-                                        </span>
-                                    </div>
-                                    <span className="text-[9px] sm:text-[10px] text-slate-400 mt-1.5 text-center leading-tight font-medium">
-                                        {phaseLabels[phase]}
+                            <div key={phase} className="flex flex-col items-center relative">
+                                {highPri > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white z-10">
+                                        {highPri}
                                     </span>
-                                    <span className="text-[8px] sm:text-[9px] text-slate-600">{count} tareas</span>
-                                </div>
-                                {i < phaseOrder.length - 1 && (
-                                    <div className="w-3 sm:w-6 h-0.5 bg-slate-700 flex-shrink-0" />
                                 )}
+                                <div 
+                                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center border-[2px] sm:border-[3px]"
+                                    style={{ 
+                                        backgroundColor: `${semColor}20`,
+                                        borderColor: semColor,
+                                    }}
+                                >
+                                    <span className="text-xs sm:text-sm md:text-base font-black" style={{ color: semColor }}>
+                                        {progress}%
+                                    </span>
+                                </div>
+                                <span className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-400 mt-1 text-center leading-tight font-medium">
+                                    {phaseLabels[phase]}
+                                </span>
+                                <span className="text-[7px] sm:text-[8px] text-slate-600">{count} tareas</span>
                             </div>
                         )
                     })}
@@ -172,7 +195,7 @@ export default function ProjectDashboard({ projectId }: Props) {
             </div>
 
             {/* Alertas */}
-            {(unassignedTasks.length > 0 || stalledTasks.length > 0) && (
+            {(unassignedTasks.length > 0 || stalledTasks.length > 0 || overdueTasks.length > 0 || highPriorityTasks > 0) && (
                 <div className="flex flex-wrap gap-2">
                     {unassignedTasks.length > 0 && (
                         <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg">
@@ -180,7 +203,7 @@ export default function ProjectDashboard({ projectId }: Props) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                             <span className="text-[10px] text-amber-400 font-bold">
-                                {unassignedTasks.length} tarea{unassignedTasks.length > 1 ? 's' : ''} sin asignar
+                                {unassignedTasks.length} sin asignar
                             </span>
                         </div>
                     )}
@@ -190,7 +213,25 @@ export default function ProjectDashboard({ projectId }: Props) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span className="text-[10px] text-red-400 font-bold">
-                                {stalledTasks.length} tarea{stalledTasks.length > 1 ? 's' : ''} estancada{stalledTasks.length > 1 ? 's' : ''}
+                                {stalledTasks.length} estancada{stalledTasks.length > 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    )}
+                    {overdueTasks.length > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-600/40 rounded-lg">
+                            <svg className="w-4 h-4 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-[10px] text-red-300 font-bold">
+                                {overdueTasks.length} vencida{overdueTasks.length > 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    )}
+                    {highPriorityTasks > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+                            <span className="text-[10px] text-red-400 font-bold">⚠</span>
+                            <span className="text-[10px] text-red-400 font-bold">
+                                {highPriorityTasks} alta prioridad
                             </span>
                         </div>
                     )}
@@ -203,7 +244,7 @@ export default function ProjectDashboard({ projectId }: Props) {
                     { label: 'Progreso global', value: `${globalPct}%`, sub: 'promedio 6 fases', color: '#06b6d4' },
                     { label: 'Tareas totales', value: tasks.length, sub: `${tasks.filter((t:any) => t.status === 'completed').length} completadas`, color: '#a78bfa' },
                     { label: 'Trazabilidad', value: traceabilityCount, sub: `${datasets.length}D · ${experiments.length}E · ${decisions.length}Dec`, color: '#34d399' },
-                    { label: 'Asignadas', value: tasks.length - unassignedTasks.length, sub: `${unassignedTasks.length} sin asignar`, color: unassignedTasks.length > 0 ? '#f59e0b' : '#34d399' },
+                    { label: 'En riesgo', value: overdueTasks.length + highPriorityTasks, sub: `${overdueTasks.length} venc · ${highPriorityTasks} alta`, color: overdueTasks.length + highPriorityTasks > 0 ? '#ef4444' : '#34d399' },
                 ].map((m, i) => (
                     <motion.div
                         key={i}
@@ -320,6 +361,32 @@ export default function ProjectDashboard({ projectId }: Props) {
                         )}
                     </div>
                 </div>
+
+                {/* Próximas a vencer */}
+                {upcomingTasks.length > 0 && (
+                    <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3">Próximas a vencer</p>
+                        <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                            {upcomingTasks.map((t: any) => {
+                                const days = getDaysUntil(t.deadline)
+                                const isUrgent = days <= 3
+                                return (
+                                    <div key={t._id} className="flex items-center justify-between p-2 bg-slate-900/50 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            {t.priority === 'high' && (
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">⚠</span>
+                                            )}
+                                            <span className="text-xs text-slate-300 truncate max-w-[120px]">{t.name}</span>
+                                        </div>
+                                        <span className={`text-[10px] font-bold ${isUrgent ? 'text-red-400' : 'text-amber-400'}`}>
+                                            {days === 0 ? 'Hoy' : days === 1 ? 'Mañana' : `${days}d`}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 {/* Mejores experimentos */}
                 <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 md:col-span-2 xl:col-span-3">
