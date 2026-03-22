@@ -148,6 +148,7 @@ export function TaskCreateForm({ errors, register, team }: TaskCreateFormProps) 
                 <input
                     id="deadline"
                     type="date"
+                    min={new Date().toISOString().split('T')[0]}
                     className="w-full p-4 bg-[#0f172a] border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500 transition-all"
                     {...register("deadline")}
                 />

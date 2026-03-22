@@ -196,41 +196,43 @@ export default function ProjectDashboard({ projectId }: Props) {
 
             {/* Alertas */}
             {(unassignedTasks.length > 0 || stalledTasks.length > 0 || overdueTasks.length > 0 || highPriorityTasks > 0) && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                     {unassignedTasks.length > 0 && (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                            <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex items-center gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                            <svg className="w-6 h-6 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
-                            <span className="text-[10px] text-amber-400 font-bold">
+                            <span className="text-sm text-amber-400 font-bold">
                                 {unassignedTasks.length} sin asignar
                             </span>
                         </div>
                     )}
                     {stalledTasks.length > 0 && (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-                            <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                            <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="text-[10px] text-red-400 font-bold">
+                            <span className="text-sm text-red-400 font-bold">
                                 {stalledTasks.length} estancada{stalledTasks.length > 1 ? 's' : ''}
                             </span>
                         </div>
                     )}
                     {overdueTasks.length > 0 && (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-600/40 rounded-lg">
-                            <svg className="w-4 h-4 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex items-center gap-3 px-4 py-3 bg-red-600/20 border border-red-600/40 rounded-xl">
+                            <svg className="w-6 h-6 text-red-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="text-[10px] text-red-300 font-bold">
+                            <span className="text-sm text-red-300 font-bold">
                                 {overdueTasks.length} vencida{overdueTasks.length > 1 ? 's' : ''}
                             </span>
                         </div>
                     )}
                     {highPriorityTasks > 0 && (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-                            <span className="text-[10px] text-red-400 font-bold">⚠</span>
-                            <span className="text-[10px] text-red-400 font-bold">
+                        <div className="flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                            <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span className="text-sm text-red-400 font-bold">
                                 {highPriorityTasks} alta prioridad
                             </span>
                         </div>
